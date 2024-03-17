@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace SonicSpectrum.Presentation.Controllers
 {
     [ApiController]
-    [Route("[controller]"),Authorize]
+    [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -19,8 +19,22 @@ namespace SonicSpectrum.Presentation.Controllers
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        [HttpGet("admin")]
+        [Authorize(Roles = "Admin")]
+        public IEnumerable<WeatherForecast> GetForecastByAdmin()
+        {
+            return Enumerable.Range(1, 10).Select(index => new WeatherForecast
+            {
+                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+                TemperatureC = Random.Shared.Next(-20, 55),
+                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+            })
+            .ToArray();
+        }
+
+        [HttpGet("user")]
+        [Authorize(Roles = "User")]
+        public IEnumerable<WeatherForecast> GetForecastByUser()
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {

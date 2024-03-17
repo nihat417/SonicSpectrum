@@ -6,4 +6,20 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Services\Concrete\**" />
+    <EmbeddedResource Remove="Services\Concrete\**" />
+    <None Remove="Services\Concrete\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SonicSpectrum.Domain\SonicSpectrum.Domain.csproj" />
+    <ProjectReference Include="..\SonicSpectrum.Persistence\SonicSpectrum.Persistence.csproj" />
+  </ItemGroup>
+
 </Project>
