@@ -1,9 +1,7 @@
-﻿using Castle.Core.Configuration;
-using IdentityManagerServerApi.Services;
+﻿using IdentityManagerServerApi.Services;
 using Microsoft.AspNetCore.Identity;
 using SonicSpectrum.Application.DTOs;
 using SonicSpectrum.Application.Repository.Abstract;
-using SonicSpectrum.Application.Responses;
 using SonicSpectrum.Application.UserSessions;
 using SonicSpectrum.Domain.Entities;
 using static SonicSpectrum.Application.Responses.ServiceResponses;

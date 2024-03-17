@@ -16,17 +16,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen( options =>
+
+builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-    {
-        Description = "Standard Authorization header using the Bearer scheme (\"bearer {token}\")",
-        In = ParameterLocation.Header,
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-    });
-    options.OperationFilter<SecurityRequirementsOperationFilter>();
+    options.UseSqlServer(builder.Configuration.GetConnectionString("default") ??
+        throw new InvalidOperationException("Connection String is not found"));
 });
+
+builder.Services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddSignInManager()
+    .AddRoles<IdentityRole>();
+
 
 // JWT 
 builder.Services.AddAuthentication(options =>
@@ -48,16 +49,21 @@ builder.Services.AddAuthentication(options =>
 });
 
 
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddSwaggerGen( options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("default") ??
-        throw new InvalidOperationException("Connection String is not found"));
+    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    {
+        Description = "Standard Authorization header using the Bearer scheme (\"bearer {token}\")",
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+    });
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
-builder.Services.AddIdentity<User, IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddSignInManager()
-    .AddRoles<IdentityRole>();
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+
 
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddScoped<IAuthService,AuthService>();
