@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SonicSpectrum.Persistence.Data;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
@@ -11,7 +11,6 @@ using SonicSpectrum.Application.Repository.Abstract;
 using SonicSpectrum.Application.Repository.Concrete;
 using IdentityManagerServerApi.Services;
 using SonicSpectrum.Application.Models;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -5,12 +5,8 @@ using MailKit.Net.Smtp;
 
 namespace SonicSpectrum.Application.Repository.Concrete
 {
-    public class EmailService : IEmailService
+    public class EmailService(EmailConfiguration _emailConfig) : IEmailService
     {
-        private readonly EmailConfiguration _emailConfig;
-
-        public EmailService(EmailConfiguration emailConfig) => _emailConfig = emailConfig;
-
         public void SendEmail(Message message)
         {
             var emailMessage = CreatedEmailMessage(message);

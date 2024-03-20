@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Azure;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SonicSpectrum.Application.DTOs;
 using SonicSpectrum.Application.Models;
@@ -37,7 +38,55 @@ namespace SonicSpectrum.Presentation.Controllers
             return BadRequest();
         }
 
+        [HttpPost("ForgotPassword")]
+        
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
+                return BadRequest("User not found or email is not confirmed.");
+            }
 
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var resetLink = Url.Action("ResetPassword", "Auth", new { token, email }, Request.Scheme);
+            var message = new Message(new string[] { email }, "Reset Password Link", resetLink!);
+            _emailService.SendEmail(message);
+
+            return Ok("Password reset link has been sent to your email.");
+        }
+
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword(string token, string email, string newPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return BadRequest("User not found.");
+
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            if (result.Succeeded)
+                return Ok("Password has been reset successfully.");
+            else
+                return BadRequest("Failed to reset password.");
+        }
+
+        [HttpPost("ChangePassword")]
+        public async Task<IActionResult> ChangePassword(string email, string currentPassword, string newPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return BadRequest("User not found.");
+
+            var passwordCheckResult = await _userManager.CheckPasswordAsync(user, currentPassword);
+            if (!passwordCheckResult)
+                return BadRequest("Current password is incorrect.");
+
+            var changePasswordResult = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            if (changePasswordResult.Succeeded)
+                return Ok("Password has been changed successfully.");
+            else
+                return BadRequest("Failed to change password.");
+        }
 
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string token, string email)
@@ -46,25 +95,16 @@ namespace SonicSpectrum.Presentation.Controllers
             {
                 var user = await _userManager.FindByEmailAsync(email);
                 if (user == null)
-                {
-                    return NotFound(); // Возвращаем ошибку 404, если пользователь не найден
-                }
+                    return NotFound();
 
                 var result = await _userManager.ConfirmEmailAsync(user, token);
                 if (result.Succeeded)
-                {
-                    // Здесь можно добавить дополнительные действия при успешном подтверждении email, если это необходимо
-                    return Ok(); // Возвращаем успешный результат
-                }
+                    return Ok();
                 else
-                {
-                    // Возвращаем ошибку с сообщением о неудачном подтверждении email
                     return BadRequest("Failed to confirm email");
-                }
             }
             catch (Exception ex)
             {
-                // Возвращаем ошибку сервера с дополнительной информацией
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
