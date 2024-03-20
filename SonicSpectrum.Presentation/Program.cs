@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Identity;
 using SonicSpectrum.Application.Repository.Abstract;
 using SonicSpectrum.Application.Repository.Concrete;
 using IdentityManagerServerApi.Services;
+using SonicSpectrum.Application.Models;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +25,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         throw new InvalidOperationException("Connection String is not found"));
 });
 
-builder.Services.AddIdentity<User, IdentityRole>()
+builder.Services.AddIdentity<User, IdentityRole>(option =>
+{
+    option.SignIn.RequireConfirmedEmail = true;
+})
+    .AddDefaultTokenProviders()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager()
     .AddRoles<IdentityRole>();
@@ -61,12 +67,16 @@ builder.Services.AddSwaggerGen( options =>
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
+var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
-
+builder.Services.AddSingleton(emailConfig!);
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddScoped<IAuthService,AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 
 
 var app = builder.Build();
