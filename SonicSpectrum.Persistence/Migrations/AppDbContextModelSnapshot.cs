@@ -25,6 +25,36 @@ namespace SonicSpectrum.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("AlbumTrack", b =>
+                {
+                    b.Property<string>("AlbumsAlbumId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TracksTrackId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("AlbumsAlbumId", "TracksTrackId");
+
+                    b.HasIndex("TracksTrackId");
+
+                    b.ToTable("AlbumTrack");
+                });
+
+            modelBuilder.Entity("GenreTrack", b =>
+                {
+                    b.Property<string>("GenresGenreId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TracksTrackId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("GenresGenreId", "TracksTrackId");
+
+                    b.HasIndex("TracksTrackId");
+
+                    b.ToTable("GenreTrack");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -158,6 +188,83 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Album", b =>
+                {
+                    b.Property<string>("AlbumId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ArtistId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AlbumId");
+
+                    b.HasIndex("ArtistId");
+
+                    b.ToTable("Albums");
+                });
+
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Artist", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Artists");
+                });
+
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Genre", b =>
+                {
+                    b.Property<string>("GenreId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ArtistId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("GenreId");
+
+                    b.HasIndex("ArtistId");
+
+                    b.ToTable("Genres");
+                });
+
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Track", b =>
+                {
+                    b.Property<string>("TrackId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ArtistId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("TrackId");
+
+                    b.HasIndex("ArtistId");
+
+                    b.ToTable("Tracks");
+                });
+
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.User", b =>
                 {
                     b.Property<string>("Id")
@@ -236,6 +343,36 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("AlbumTrack", b =>
+                {
+                    b.HasOne("SonicSpectrum.Domain.Entities.Album", null)
+                        .WithMany()
+                        .HasForeignKey("AlbumsAlbumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SonicSpectrum.Domain.Entities.Track", null)
+                        .WithMany()
+                        .HasForeignKey("TracksTrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GenreTrack", b =>
+                {
+                    b.HasOne("SonicSpectrum.Domain.Entities.Genre", null)
+                        .WithMany()
+                        .HasForeignKey("GenresGenreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SonicSpectrum.Domain.Entities.Track", null)
+                        .WithMany()
+                        .HasForeignKey("TracksTrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -285,6 +422,44 @@ namespace SonicSpectrum.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Album", b =>
+                {
+                    b.HasOne("SonicSpectrum.Domain.Entities.Artist", "Artist")
+                        .WithMany("Albums")
+                        .HasForeignKey("ArtistId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Artist");
+                });
+
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Genre", b =>
+                {
+                    b.HasOne("SonicSpectrum.Domain.Entities.Artist", null)
+                        .WithMany("Genres")
+                        .HasForeignKey("ArtistId");
+                });
+
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Track", b =>
+                {
+                    b.HasOne("SonicSpectrum.Domain.Entities.Artist", "Artist")
+                        .WithMany("Tracks")
+                        .HasForeignKey("ArtistId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Artist");
+                });
+
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Artist", b =>
+                {
+                    b.Navigation("Albums");
+
+                    b.Navigation("Genres");
+
+                    b.Navigation("Tracks");
                 });
 #pragma warning restore 612, 618
         }
