@@ -75,6 +75,7 @@ builder.Services.AddSingleton(emailConfig!);
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddScoped<IAuthService,AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IMusicSettingService,MusicSettingService>();
 
 
 

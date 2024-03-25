@@ -2,7 +2,7 @@
 {
     public class Genre
     {
-        public string GenreId { get; set; }
+        public string GenreId { get; set; } = Guid.NewGuid().ToString();
         public string Name { get; set; }
         public virtual ICollection<Track> Tracks { get; set; }
     }
