@@ -8,6 +8,20 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
     [ApiController]
     public class MusicController (IMusicSettingService _musicSettingService) : ControllerBase
     {
+        private readonly string _musicFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "UploadMusic");
+
+        [HttpGet("{fileName}")]
+        public IActionResult GetMusic(string fileName)
+        {
+            var filePath = Path.Combine(_musicFolderPath, fileName);
+
+            if (!System.IO.File.Exists(filePath))
+                return NotFound();
+
+            var stream = new FileStream(filePath,FileMode.Open);
+            return File(stream, "audio/mpeg");
+        }
+
         [HttpPost("addArtist")]
         public async Task<IActionResult> AddArtist([FromBody] ArtistDTO artistDto)
         {
