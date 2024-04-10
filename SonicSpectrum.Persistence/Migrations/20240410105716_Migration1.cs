@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SonicSpectrum.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Migratn : Migration
+    public partial class Migration1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -67,37 +67,30 @@ namespace SonicSpectrum.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Genres",
+                columns: table => new
+                {
+                    GenreId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Genres", x => x.GenreId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Albums",
                 columns: table => new
                 {
                     AlbumId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ArtistId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ArtistId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Albums", x => x.AlbumId);
                     table.ForeignKey(
                         name: "FK_Albums_Artists_ArtistId",
-                        column: x => x.ArtistId,
-                        principalTable: "Artists",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Genres",
-                columns: table => new
-                {
-                    GenreId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ArtistId = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Genres", x => x.GenreId);
-                    table.ForeignKey(
-                        name: "FK_Genres_Artists_ArtistId",
                         column: x => x.ArtistId,
                         principalTable: "Artists",
                         principalColumn: "Id");
@@ -110,7 +103,9 @@ namespace SonicSpectrum.Persistence.Migrations
                     TrackId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ArtistId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ArtistId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    AlbumId = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -119,8 +114,7 @@ namespace SonicSpectrum.Persistence.Migrations
                         name: "FK_Tracks_Artists_ArtistId",
                         column: x => x.ArtistId,
                         principalTable: "Artists",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -277,6 +271,24 @@ namespace SonicSpectrum.Persistence.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Lyrics",
+                columns: table => new
+                {
+                    LyricId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TrackId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Lyrics", x => x.LyricId);
+                    table.ForeignKey(
+                        name: "FK_Lyrics_Tracks_TrackId",
+                        column: x => x.TrackId,
+                        principalTable: "Tracks",
+                        principalColumn: "TrackId");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Albums_ArtistId",
                 table: "Albums",
@@ -327,14 +339,14 @@ namespace SonicSpectrum.Persistence.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Genres_ArtistId",
-                table: "Genres",
-                column: "ArtistId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_GenreTrack_TracksTrackId",
                 table: "GenreTrack",
                 column: "TracksTrackId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Lyrics_TrackId",
+                table: "Lyrics",
+                column: "TrackId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tracks_ArtistId",
@@ -365,6 +377,9 @@ namespace SonicSpectrum.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "GenreTrack");
+
+            migrationBuilder.DropTable(
+                name: "Lyrics");
 
             migrationBuilder.DropTable(
                 name: "Albums");

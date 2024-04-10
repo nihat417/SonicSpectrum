@@ -7,6 +7,5 @@
         public string Name { get => _name; set => _name = string.IsNullOrWhiteSpace(value) ? "unknown": value; }
         public virtual ICollection<Track> ?Tracks { get; set; }
         public virtual ICollection<Album> ?Albums { get; set; }
-        public virtual ICollection<Genre> ?Genres { get; set; }
     }
 }
