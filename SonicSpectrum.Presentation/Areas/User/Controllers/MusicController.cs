@@ -18,8 +18,17 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
             if (!System.IO.File.Exists(filePath))
                 return NotFound();
 
-            var stream = new FileStream(filePath,FileMode.Open);
-            return File(stream, "audio/mpeg");
+            try
+            {
+                using (var stream = new FileStream(filePath, FileMode.Open))
+                {
+                    return File(stream, "audio/mpeg");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "error when opened music file");
+            }
         }
 
         [HttpPost("addArtist")]

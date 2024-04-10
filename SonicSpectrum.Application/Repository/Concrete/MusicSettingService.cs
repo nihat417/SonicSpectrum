@@ -11,7 +11,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
     {
         public async Task AddArtistAsync(ArtistDTO artistDto)
         {
-            var artist = new Artist {Name = artistDto.Name!};
+            var artist = new Artist { Name = artistDto.Name! };
             await _context.Artists.AddAsync(artist);
             await _context.SaveChangesAsync();
         }
@@ -35,7 +35,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
             {
                 Title = trackDto.Title!,
                 ArtistId = trackDto.ArtistId!,
-                FilePath = await UploadFileHelper.UploadFile(trackDto.FilePath!),
+                FilePath = await UploadFileHelper.UploadFile(trackDto.FilePath!, "musicplay",trackDto.Title!),
             };
 
             if (trackDto.AlbumTitles != null)
@@ -61,7 +61,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
 
         public async Task DeleteArtistAsync(string artistId)
         {
-            var artist =  await _context.Artists.FindAsync(artistId);
+            var artist = await _context.Artists.FindAsync(artistId);
             if (artist != null)
             {
                 _context.Artists.Remove(artist);
@@ -84,12 +84,15 @@ namespace SonicSpectrum.Application.Repository.Concrete
         public async Task DeleteTrackAsync(string trackId)
         {
             var track = await _context.Tracks.FindAsync(trackId);
-            if(track != null)
+            if (track != null)
             {
                 _context.Tracks.Remove(track);
                 await _context.SaveChangesAsync();
+
+                await UploadFileHelper.DeleteFile(track.Title, "musicplay");
+                await Console.Out.WriteLineAsync($"Track '{track.Title}' and associated file deleted successfully");
             }
-            await Console.Out.WriteLineAsync($"{track} is not found");
+            else await Console.Out.WriteLineAsync($"Track with ID '{trackId}' is not found");
         }
     }
 }

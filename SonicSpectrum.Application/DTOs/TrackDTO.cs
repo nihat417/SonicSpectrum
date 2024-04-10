@@ -4,7 +4,6 @@ namespace SonicSpectrum.Application.DTOs
 {
     public class TrackDTO
     {
-        public string Id { get; set; } = Guid.NewGuid().ToString();
         public string? Title { get; set; }
         public IFormFile? FilePath { get; set; } 
         public string? ArtistId { get; set; }
