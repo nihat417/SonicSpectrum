@@ -9,6 +9,7 @@
         public string? ArtistId { get; set; }
         public string? AlbumId { get; set; }
         public virtual Artist? Artist { get; set; }
+        public virtual Album? Album { get; set; }
         public virtual ICollection<Lyric>? Lyrics { get; set; }
         public virtual ICollection<Album>? Albums { get; set; }
         public virtual ICollection<Genre>? Genres { get; set; }

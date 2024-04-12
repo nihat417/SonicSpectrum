@@ -8,68 +8,115 @@ namespace SonicSpectrum.Presentation.Areas.Admin.Controllers
     [ApiController]
     public class MusicSettingsController(IMusicSettingService _musicSettingService) : ControllerBase
     {
+
+        #region Post
+
         [HttpPost("addArtist")]
         public async Task<IActionResult> AddArtist([FromBody] ArtistDTO artistDto)
         {
-            var artistAdded = await _musicSettingService.AddArtistAsync(artistDto);
-            if (artistAdded) return Ok("Artist added successfully.");
-            return BadRequest("Artist Is null");
+            var result = await _musicSettingService.AddArtistAsync(artistDto);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
         }
 
         [HttpPost("addAlbum")]
         public async Task<IActionResult> AddAlbum([FromForm] AlbumDto albumDto)
         {
-            var albumAdded = await _musicSettingService.AddAlbumAsync(albumDto);
-            if (albumAdded) return Ok("Album added successfully.");
-            return BadRequest("Error");
+            var result = await _musicSettingService.AddAlbumAsync(albumDto);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
         }
 
         [HttpPost("addGenre")]
         public async Task<IActionResult> AddGenre([FromBody] GenreDTO genreDto)
         {
-            var genreAdded = await _musicSettingService.AddGenreAsync(genreDto);
-            if(genreAdded) return Ok("Genre added successfully.");
-            return BadRequest("This Genre Already exist");
+            var result = await _musicSettingService.AddGenreAsync(genreDto);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
         }
 
         [HttpPost("addTrack")]
         public async Task<IActionResult> AddTrack([FromForm] TrackDTO trackDto)
         {
-            var trackAdded = await _musicSettingService.AddTrackAsync(trackDto);
-            if(trackAdded) return Ok("Track added successfully.");
-            return BadRequest("Error");
+            var result = await _musicSettingService.AddTrackAsync(trackDto);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
         }
+
+        #endregion
+
+        #region Put
+
+        [HttpPut("editAlbum/{albumId}")]
+        public async Task<IActionResult> EditAlbum(string albumId, [FromBody] AlbumDto albumDto)
+        {
+            var result = await _musicSettingService.EditAlbumAsync(albumId, albumDto);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
+        }
+
+        [HttpPut("editArtist/{artistId}")]
+        public async Task<IActionResult> EditArtist(string artistId, [FromBody] ArtistDTO artistDto)
+        {
+            var result = await _musicSettingService.EditArtistAsync(artistId, artistDto);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
+        }
+
+        [HttpPut("editGenre/{genreId}")]
+        public async Task<IActionResult> EditGenre(string genreId, [FromBody] GenreDTO genreDto)
+        {
+            var result = await _musicSettingService.EditGenreAsync(genreId, genreDto);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
+        }
+
+        [HttpPut("editTrack/{trackId}")]
+        public async Task<IActionResult> EditTrack(string trackId, [FromBody] TrackDTO trackDto)
+        {
+            var result = await _musicSettingService.EditTrackAsync(trackId, trackDto);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
+        }
+
+
+        #endregion
+
+        #region delete
 
         [HttpDelete("deleteAlbum/{albumId}")]
         public async Task<IActionResult> DeleteAlbum(string albumId)
         {
-            var albumDeleted = await _musicSettingService.DeleteAlbumAsync(albumId);
-            if(albumDeleted) return Ok("Album deleted successfully.");
-            return BadRequest("Error");
+            var result = await _musicSettingService.DeleteAlbumAsync(albumId);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
         }
 
         [HttpDelete("deleteTrack/{trackId}")]
         public async Task<IActionResult> DeleteTrack(string trackId)
         {
-            var trackDeleted = await _musicSettingService.DeleteTrackAsync(trackId);
-            if(trackDeleted) return Ok("Track deleted successfully.");
-            return BadRequest("Error");
+            var result = await _musicSettingService.DeleteTrackAsync(trackId);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
         }
 
         [HttpDelete("deleteArtist/{artistId}")]
         public async Task<IActionResult> DeleteArtist(string artistId)
         {
-            var artistDeeleted = await _musicSettingService.DeleteArtistAsync(artistId);
-            if(artistDeeleted) return Ok("Artist deleted successfully.");
-            return BadRequest("Error");
+            var result = await _musicSettingService.DeleteArtistAsync(artistId);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
         }
 
         [HttpDelete("deleteGenre/{genreId}")]
         public async Task<IActionResult> DeleteGenre(string genreId)
         {
-            var genreDeleted = await _musicSettingService.DeleteGenreAsync(genreId);
-            if(genreDeleted) return Ok("Genre deleted successfully.");
-            return BadRequest("Error");
+            var result = await _musicSettingService.DeleteGenreAsync(genreId);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
         }
+
+        #endregion
+
     }
 }

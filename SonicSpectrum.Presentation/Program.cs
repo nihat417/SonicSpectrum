@@ -11,6 +11,7 @@ using SonicSpectrum.Application.Repository.Abstract;
 using SonicSpectrum.Application.Repository.Concrete;
 using IdentityManagerServerApi.Services;
 using SonicSpectrum.Application.Models;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,12 @@ builder.Services.AddIdentity<User, IdentityRole>(option =>
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager()
     .AddRoles<IdentityRole>();
+
+
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+});
 
 
 // JWT 

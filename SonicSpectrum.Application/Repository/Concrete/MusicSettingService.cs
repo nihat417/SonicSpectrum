@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SonicSpectrum.Application.DTOs;
+using SonicSpectrum.Application.Models;
 using SonicSpectrum.Application.Repository.Abstract;
 using SonicSpectrum.Application.Services;
 using SonicSpectrum.Domain.Entities;
@@ -9,177 +11,600 @@ namespace SonicSpectrum.Application.Repository.Concrete
 {
     public class MusicSettingService(AppDbContext _context) : IMusicSettingService
     {
+        #region get
+
+        public async Task<IEnumerable<object>> GetAllTracksAsync(int pageNumber, int pageSize)
+        {
+            var tracks = await _context.Tracks
+                                        .Skip((pageNumber - 1) * pageSize)
+                                        .Take(pageSize)
+                                        .Select(t => new {
+                                            t.TrackId,
+                                            t.Title,
+                                            t.FilePath,
+                                            t.ImagePath,
+                                            t.ArtistId,
+                                            t.AlbumId,
+                                        })
+                                        .ToListAsync();
+
+            return tracks;
+        }
+
+        #endregion
+
+
         #region Add
 
-        public async Task<bool> AddAlbumAsync(AlbumDto albumDto)
+        public async Task<OperationResult> AddAlbumAsync(AlbumDto albumDto)
         {
-            var artist = await _context.Artists.FirstOrDefaultAsync(art=>art.Id == albumDto.ArtistId);
-            if (artist != null)
+            var result = new OperationResult();
+
+            var artist = await _context.Artists.FirstOrDefaultAsync(art => art.Id == albumDto.ArtistId);
+
+            if (artist == null)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Artist with ID {albumDto.ArtistId} is not found.";
+                return result;
+            }
+
+            if(albumDto == null || albumDto.Title == null || string.IsNullOrEmpty(albumDto.Title))
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Album is null or empty";
+                return result;
+            }
+
+            try
             {
                 var album = new Album { Title = albumDto.Title, ArtistId = artist.Id };
                 await _context.Albums.AddAsync(album);
                 await _context.SaveChangesAsync();
-                return true;
+
+                result.Success = true;
+                result.Message = $"{album} Added successfully";
+                return result;
             }
-            await Console.Out.WriteLineAsync($"{artist} is don't find");
-            return false;
+            catch (DbUpdateException ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Database update error: {ex.Message}";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"An error occurred: {ex.Message}";
+                return result;
+            }
         }
 
-        public async Task<bool> AddArtistAsync(ArtistDTO artistDto)
+        public async Task<OperationResult> AddArtistAsync(ArtistDTO artistDto)
         {
-            if(artistDto.Name != null)
+            var result = new OperationResult();
+
+            if (artistDto == null || artistDto.Name == null)
             {
-                var artist = new Artist { Name = artistDto.Name! };
+                result.Success = false;
+                result.ErrorMessage = "ArtistDTO or artist name is null.";
+                return result;
+            }
+
+            try
+            {
+                var artist = new Artist { Name = artistDto.Name };
                 await _context.Artists.AddAsync(artist);
                 await _context.SaveChangesAsync();
-                return true;
+
+                result.Success = true;
+                result.Message = $"{artist} Added successfully";
+                return result;
             }
-            await Console.Out.WriteLineAsync($"{artistDto.Name} is null");
-            return false;
+            catch (DbUpdateException ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Database update error: {ex.Message}";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"An error occurred: {ex.Message}";
+                return result;
+            }
         }
 
-        public async Task<bool> AddGenreAsync(GenreDTO genreDto)
+        public async Task<OperationResult> AddGenreAsync(GenreDTO genreDto)
         {
-            var genreName = await _context.Genres.FirstOrDefaultAsync(g => g.Name == genreDto.Name);
-            if (genreName == null)
+            var result = new OperationResult();
+
+            if (genreDto == null || genreDto.Name == null || string.IsNullOrEmpty(genreDto.Name))
             {
-                var genre = new Genre { Name = genreDto.Name! };
-                await _context.Genres.AddAsync(genre);
+                result.Success = false;
+                result.ErrorMessage = "GenreDTO or genre name is null.";
+                return result;
+            }
+
+            try
+            {
+                var existingGenre = await _context.Genres.FirstOrDefaultAsync(g => g.Name == genreDto.Name);
+                if (existingGenre == null)
+                {
+                    var genre = new Genre { Name = genreDto.Name };
+                    await _context.Genres.AddAsync(genre);
+                    await _context.SaveChangesAsync();
+                    result.Success = true;
+                    result.Message = $"{genre} Added successfully"; 
+                    return result;
+                }
+
+                result.Success = false;
+                result.ErrorMessage = $"{genreDto.Name} already exists.";
+                return result;
+            }
+            catch (DbUpdateException ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Database update error: {ex.Message}";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"An error occurred: {ex.Message}";
+                return result;
+            }
+        }
+
+        public async Task<OperationResult> AddTrackAsync(TrackDTO trackDto)
+        {
+            var result = new OperationResult();
+
+            if (trackDto == null || trackDto.Title == null || trackDto.ArtistId == null || trackDto.AlbumId == null
+                || trackDto.FilePath == null || trackDto.ImagePath == null || string.IsNullOrEmpty(trackDto.Title))
+            {
+                result.Success = false;
+                result.ErrorMessage = "One or more required fields are null.";
+                return result;
+            }
+
+            try
+            {
+                var artist = await _context.Artists.FirstOrDefaultAsync(a => a.Id == trackDto.ArtistId);
+                if (artist == null)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = $"Artist with ID {trackDto.ArtistId} is not found";
+                    return result;
+                }
+
+                var album = await _context.Albums.FirstOrDefaultAsync(a => a.AlbumId == trackDto.AlbumId && a.ArtistId == artist.Id);
+                if (album == null)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = $"Album with ID {trackDto.AlbumId} does not belong to the specified artist";
+                    return result;
+                }
+
+                var track = new Track
+                {
+                    Title = trackDto.Title,
+                    ArtistId = trackDto.ArtistId,
+                    AlbumId = trackDto.AlbumId,
+                    FilePath = await UploadFileHelper.UploadFile(trackDto.FilePath, "musicplay", trackDto.Title),
+                    ImagePath = await UploadFileHelper.UploadFile(trackDto.ImagePath, "musicphoto", trackDto.Title)
+                };
+
+                track.Albums = new HashSet<Album>();
+                track.Genres = new HashSet<Genre>();
+                track.Lyrics = new HashSet<Lyric>();
+
+                if (trackDto.AlbumTitles != null)
+                {
+                    foreach (var albumTitle in trackDto.AlbumTitles)
+                    {
+                        var albumFromTitles = await _context.Albums.FirstOrDefaultAsync(a => a.Title == albumTitle && a.ArtistId == artist.Id);
+                        if (albumFromTitles != null)
+                            track.Albums.Add(albumFromTitles);
+                    }
+                }
+
+                if (trackDto.GenreNames != null)
+                {
+                    foreach (var genreName in trackDto.GenreNames)
+                    {
+                        var genre = await _context.Genres.FirstOrDefaultAsync(g => g.Name == genreName);
+                        if (genre != null)
+                            track.Genres.Add(genre);
+                    }
+                }
+
+                if (trackDto.Lyrics != null)
+                {
+                    foreach (var lyricDto in trackDto.Lyrics)
+                    {
+                        string lyricText = lyricDto.Text!;
+                        var lyric = new Lyric { Text = lyricText };
+                        track.Lyrics.Add(lyric);
+                    }
+                }
+
+                await _context.Tracks.AddAsync(track);
                 await _context.SaveChangesAsync();
-                return true;
+
+                result.Success = true;
+                result.Message = $"{track} Added successfully";
+                return result;
             }
-            await Console.Out.WriteLineAsync($"{genreName} is already extist");
-            return false;
+            catch (DbUpdateException ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Database update error: {ex.Message}";
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"An error occurred: {ex.Message}";
+            }
+
+            return result;
         }
 
-        public async Task<bool> AddTrackAsync(TrackDTO trackDto)
+
+        #endregion
+
+        #region Edit
+
+        public async Task<OperationResult> EditAlbumAsync(string albumId, AlbumDto albumDto)
         {
-            var artist = await _context.Artists.FirstOrDefaultAsync(a => a.Id == trackDto.ArtistId);
-            if (artist == null)
+            var result = new OperationResult();
+
+            if (string.IsNullOrEmpty(albumId))
             {
-                await Console.Out.WriteLineAsync($"Artist with ID {trackDto.ArtistId} is not found");
-                return false;
+                result.Success = false;
+                result.ErrorMessage = "Album ID is null or empty.";
+                return result;
             }
 
-            var track = new Track
+            var existingAlbum = await _context.Albums.FindAsync(albumId);
+            if (existingAlbum == null)
             {
-                Title = trackDto.Title!,
-                ArtistId = trackDto.ArtistId!,
-                AlbumId = trackDto.AlbumId!,
-                FilePath = await UploadFileHelper.UploadFile(trackDto.FilePath!, "musicplay", trackDto.Title!),
-                ImagePath = await UploadFileHelper.UploadFile(trackDto.ImagePath!, "musicphoto", trackDto.Title!)
-            };
-
-            track.Albums = new HashSet<Album>();
-            track.Genres = new HashSet<Genre>();
-            track.Lyrics = new HashSet<Lyric>();
-
-            if (trackDto.AlbumTitles != null)
-            {
-                foreach (var albumTitle in trackDto.AlbumTitles)
-                {
-                    var album = await _context.Albums.FirstOrDefaultAsync(a => a.Title == albumTitle);
-                    if (album != null)
-                        track.Albums.Add(album);
-                }
+                result.Success = false;
+                result.ErrorMessage = $"Album with ID {albumId} not found.";
+                return result;
             }
 
-            if (trackDto.GenreNames != null)
+            if (albumDto == null || string.IsNullOrEmpty(albumDto.Title))
             {
-                foreach (var genreName in trackDto.GenreNames)
-                {
-                    var genre = await _context.Genres.FirstOrDefaultAsync(g => g.Name == genreName);
-                    if (genre != null)
-                        track.Genres.Add(genre);
-                }
+                result.Success = false;
+                result.ErrorMessage = "AlbumDTO or album title is null or empty.";
+                return result;
             }
 
-            if (trackDto.Lyrics != null)
-            {
-                foreach (var lyricDto in trackDto.Lyrics)
-                {
-                    string lyricText = lyricDto.Text!;
-                    var lyric = new Lyric { Text = lyricText };
-                    track.Lyrics.Add(lyric);
-                }
-            }
-
-            await _context.Tracks.AddAsync(track);
+            existingAlbum.Title = albumDto.Title;
 
             try
             {
                 await _context.SaveChangesAsync();
+
+                result.Success = true;
+                result.Message = $"Album with ID {albumId} updated successfully.";
+                return result;
             }
             catch (DbUpdateException ex)
             {
-                await Console.Out.WriteLineAsync($"Database update error: {ex.Message}");
+                result.Success = false;
+                result.ErrorMessage = $"Database update error: {ex.Message}";
+                return result;
             }
             catch (Exception ex)
             {
-                await Console.Out.WriteLineAsync($"An error occurred: {ex.Message}");
+                result.Success = false;
+                result.ErrorMessage = $"An error occurred: {ex.Message}";
+                return result;
             }
-            return true;
         }
+
+        public async Task<OperationResult> EditArtistAsync(string artistId, ArtistDTO artistDto)
+        {
+            var result = new OperationResult();
+
+            if (string.IsNullOrEmpty(artistId))
+            {
+                result.Success = false;
+                result.ErrorMessage = "Artist ID is null or empty.";
+                return result;
+            }
+
+            var existingArtist = await _context.Artists.FindAsync(artistId);
+            if (existingArtist == null)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Artist with ID {artistId} not found.";
+                return result;
+            }
+
+            if (artistDto == null || string.IsNullOrEmpty(artistDto.Name))
+            {
+                result.Success = false;
+                result.ErrorMessage = "ArtistDTO or artist name is null or empty.";
+                return result;
+            }
+
+            existingArtist.Name = artistDto.Name; 
+
+            try
+            {
+                await _context.SaveChangesAsync();
+
+                result.Success = true;
+                result.Message = $"Artist with ID {artistId} updated successfully.";
+                return result;
+            }
+            catch (DbUpdateException ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Database update error: {ex.Message}";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"An error occurred: {ex.Message}";
+                return result;
+            }
+        }
+
+        public async Task<OperationResult> EditGenreAsync(string genreId, GenreDTO genreDto)
+        {
+            var result = new OperationResult();
+
+            if (string.IsNullOrEmpty(genreId))
+            {
+                result.Success = false;
+                result.ErrorMessage = "Genre ID is null or empty.";
+                return result;
+            }
+
+            var existingGenre = await _context.Genres.FindAsync(genreId);
+            if (existingGenre == null)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Genre with ID {genreId} not found.";
+                return result;
+            }
+
+            if (genreDto == null || string.IsNullOrEmpty(genreDto.Name))
+            {
+                result.Success = false;
+                result.ErrorMessage = "GenreDTO or genre name is null or empty.";
+                return result;
+            }
+
+            existingGenre.Name = genreDto.Name; 
+
+            try
+            {
+                await _context.SaveChangesAsync();
+
+                result.Success = true;
+                result.Message = $"Genre with ID {genreId} updated successfully.";
+                return result;
+            }
+            catch (DbUpdateException ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Database update error: {ex.Message}";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"An error occurred: {ex.Message}";
+                return result;
+            }
+        }
+
+        public async Task<OperationResult> EditTrackAsync(string trackId, TrackDTO trackDto)
+        {
+            var result = new OperationResult();
+
+            if (string.IsNullOrEmpty(trackId))
+            {
+                result.Success = false;
+                result.ErrorMessage = "Track ID is null or empty.";
+                return result;
+            }
+
+            var existingTrack = await _context.Tracks.FindAsync(trackId);
+            if (existingTrack == null)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Track with ID {trackId} not found.";
+                return result;
+            }
+
+            if (trackDto == null || string.IsNullOrEmpty(trackDto.Title) || string.IsNullOrEmpty(trackDto.ArtistId)
+                || string.IsNullOrEmpty(trackDto.AlbumId) || trackDto.FilePath == null
+                || trackDto.ImagePath == null)
+            {
+                result.Success = false;
+                result.ErrorMessage = "One or more required fields are null or empty.";
+                return result;
+            }
+
+            var artist = await _context.Artists.FirstOrDefaultAsync(a => a.Id == trackDto.ArtistId);
+            if (artist == null)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Artist with ID {trackDto.ArtistId} is not found";
+                return result;
+            }
+
+            var album = await _context.Albums.FirstOrDefaultAsync(a => a.AlbumId == trackDto.AlbumId && a.ArtistId == artist.Id);
+            if (album == null)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Album with ID {trackDto.AlbumId} does not belong to the specified artist";
+                return result;
+            }
+
+            existingTrack.Title = trackDto.Title ?? existingTrack.Title;
+            existingTrack.ArtistId = trackDto.ArtistId ?? existingTrack.ArtistId;
+            existingTrack.AlbumId = trackDto.AlbumId ?? existingTrack.AlbumId;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+
+                result.Success = true;
+                result.Message = $"Track with ID {trackId} updated successfully.";
+                return result;
+            }
+            catch (DbUpdateException ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Database update error: {ex.Message}";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"An error occurred: {ex.Message}";
+                return result;
+            }
+        }
+
+
 
         #endregion
 
         #region Delete
 
-        public async Task<bool> DeleteArtistAsync(string artistId)
+        public async Task<OperationResult> DeleteArtistAsync(string artistId)
         {
+            var result = new OperationResult();
+
             var artist = await _context.Artists.FindAsync(artistId);
             if (artist != null)
             {
-                _context.Artists.Remove(artist);
-                await _context.SaveChangesAsync();
-                return true;
+                try
+                {
+                    _context.Artists.Remove(artist);
+                    await _context.SaveChangesAsync();
+
+                    result.Success = true;
+                    result.Message = "Artist deleted successfully.";
+                }
+                catch (Exception ex)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = $"An error occurred: {ex.Message}";
+                }
             }
-            await Console.Out.WriteLineAsync($"{artist} is null");
-            return false;
+            else
+            {
+                result.Success = false;
+                result.ErrorMessage = $"{artist} is null";
+            }
+
+            return result;
         }
 
-        public async Task<bool> DeleteAlbumAsync(string albumId)
+        public async Task<OperationResult> DeleteAlbumAsync(string albumId)
         {
+            var result = new OperationResult();
+
             var album = await _context.Albums.FindAsync(albumId);
             if (album != null)
             {
-                _context.Albums.Remove(album);
-                await _context.SaveChangesAsync();
-                return true;
+                try
+                {
+                    _context.Albums.Remove(album);
+                    await _context.SaveChangesAsync();
+
+                    result.Success = true;
+                    result.Message = "Album deleted successfully.";
+                }
+                catch (Exception ex)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = $"An error occurred: {ex.Message}";
+                }
             }
-            await Console.Out.WriteLineAsync($"Album with ID {albumId} is not found");
-            return false;
+            else
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Album with ID {albumId} is not found";
+            }
+
+            return result;
         }
 
-        public async Task<bool> DeleteGenreAsync(string genreId)
+        public async Task<OperationResult> DeleteGenreAsync(string genreId)
         {
+            var result = new OperationResult();
+
             var genre = await _context.Genres.FindAsync(genreId);
             if (genre != null)
             {
-                _context.Genres.Remove(genre);
-                await _context.SaveChangesAsync();
-                return true;
+                try
+                {
+                    _context.Genres.Remove(genre);
+                    await _context.SaveChangesAsync();
+
+                    result.Success = true;
+                    result.Message = "Genre deleted successfully.";
+                }
+                catch (Exception ex)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = $"An error occurred: {ex.Message}";
+                }
             }
-            await Console.Out.WriteLineAsync($"{genre} is null");
-            return false;
+            else
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Genre with ID {genreId} is not found";
+            }
+
+            return result;
         }
 
-        public async Task<bool> DeleteTrackAsync(string trackId)
+        public async Task<OperationResult> DeleteTrackAsync(string trackId)
         {
+            var result = new OperationResult();
+
             var track = await _context.Tracks.FindAsync(trackId);
             if (track != null)
             {
-                _context.Tracks.Remove(track);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    _context.Tracks.Remove(track);
+                    await _context.SaveChangesAsync();
 
-                await UploadFileHelper.DeleteFile(track.Title, "musicplay");
-                await UploadFileHelper.DeleteFile(track.Title, "musicphoto");
-                await Console.Out.WriteLineAsync($"Track '{track.Title}' and associated file deleted successfully");
-                return true;
+                    await UploadFileHelper.DeleteFile(track.FilePath, "musicplay");
+                    await UploadFileHelper.DeleteFile(track.ImagePath!, "musicphoto");
+
+                    result.Success = true;
+                    result.Message = $"Track '{track.Title}' and associated files deleted successfully";
+                }
+                catch (Exception ex)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = $"An error occurred: {ex.Message}";
+                }
             }
-            else await Console.Out.WriteLineAsync($"Track with ID '{trackId}' is not found");
-            return false;
+            else
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Track with ID '{trackId}' is not found";
+            }
+
+            return result;
         }
+
 
         #endregion
     }
