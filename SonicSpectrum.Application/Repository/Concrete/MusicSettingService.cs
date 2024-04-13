@@ -6,6 +6,7 @@ using SonicSpectrum.Application.Repository.Abstract;
 using SonicSpectrum.Application.Services;
 using SonicSpectrum.Domain.Entities;
 using SonicSpectrum.Persistence.Data;
+using System.Diagnostics;
 
 namespace SonicSpectrum.Application.Repository.Concrete
 {
@@ -16,20 +17,88 @@ namespace SonicSpectrum.Application.Repository.Concrete
         public async Task<IEnumerable<object>> GetAllTracksAsync(int pageNumber, int pageSize)
         {
             var tracks = await _context.Tracks
-                                        .Skip((pageNumber - 1) * pageSize)
-                                        .Take(pageSize)
-                                        .Select(t => new {
-                                            t.TrackId,
-                                            t.Title,
-                                            t.FilePath,
-                                            t.ImagePath,
-                                            t.ArtistId,
-                                            t.AlbumId,
-                                        })
-                                        .ToListAsync();
+                                .Skip((pageNumber - 1) * pageSize)
+                                .Take(pageSize)
+                                .Select(t => new {
+                                    t.TrackId,
+                                    t.Title,
+                                    t.FilePath,
+                                    t.ImagePath,
+                                    ArtistName = t.Artist!.Name,
+                                    t.ArtistId,
+                                    t.AlbumId,
+                                    AlbumTitle = t.Album!.Title,
+                                })
+                                .ToListAsync();
 
             return tracks;
         }
+
+        public async Task<IEnumerable<object>> GetAllAlbumsForArtistAsync(string artistId, int pageNumber, int pageSize)
+        {
+            var artist = await _context.Artists.FindAsync(artistId);
+            if (artist == null) return Enumerable.Empty<object>();
+
+            var albums = await _context.Albums
+                                        .Where(album => album.ArtistId == artistId)
+                                        .Skip((pageNumber - 1) * pageSize)
+                                        .Take(pageSize)
+                                        .Select(album => new
+                                        {
+                                            album.AlbumId,
+                                            album.Title,
+                                            album.ArtistId
+                                        })
+                                        .ToListAsync();
+            return albums;
+        }
+
+        public async Task<IEnumerable<object>> GetMusicFromAlbum(string albumId, int pageNumber, int pageSize)
+        {
+            var album = await _context.Albums.FindAsync(albumId);
+            if(album == null) return Enumerable.Empty<object>();
+
+            var tracks = await _context.Tracks
+                                        .Where(track => track.AlbumId == albumId)
+                                        .Skip((pageNumber - 1) * pageSize)
+                                        .Take(pageSize)
+                                        .Select(track => new
+                                        {
+                                            track.TrackId,
+                                            track.Title,
+                                            track.FilePath,
+                                            track.ImagePath,
+                                            track.ArtistId,
+                                            track.AlbumId
+                                        })
+                                .ToListAsync();
+            return tracks;
+        }
+
+        public async Task<IEnumerable<object>> GetAllArtistsAsync(int pageNumber, int pageSize)
+        {
+            try
+            {
+                var artists = await _context.Artists
+                    .OrderBy(a => a.Name) 
+                    .Skip((pageNumber - 1) * pageSize) 
+                    .Take(pageSize) 
+                    .Select(a => new 
+                    {
+                        a.Id,
+                        a.Name
+                    })
+                    .ToListAsync();
+
+                return artists;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error occurred while retrieving artists: {ex.Message}");
+            }
+        }
+
+
 
         #endregion
 
@@ -251,6 +320,101 @@ namespace SonicSpectrum.Application.Repository.Concrete
             return result;
         }
 
+        public async Task<OperationResult> AddGenreToTrackAsync(string trackId, string genreName)
+        {
+            var result = new OperationResult();
+
+            if (string.IsNullOrEmpty(trackId) || string.IsNullOrEmpty(genreName))
+            {
+                result.Success = false;
+                result.ErrorMessage = "Track ID or genre name is null or empty.";
+                return result;
+            }
+
+            try
+            {
+                var track = await _context.Tracks.FirstOrDefaultAsync(t => t.TrackId == trackId);
+                if (track == null)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = $"Track with ID '{trackId}' not found.";
+                    return result;
+                }
+
+                var genre = await _context.Genres.FirstOrDefaultAsync(g => g.Name == genreName);
+                if (genre == null)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = $"Genre with name '{genreName}' not found.";
+                    return result;
+                }
+
+                track.Genres!.Add(genre);
+
+                await _context.SaveChangesAsync();
+
+                result.Success = true;
+                result.Message = $"Genre '{genre.Name}' added to track '{track.Title}' successfully.";
+                return result;
+            }
+            catch (DbUpdateException ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Database update error: {ex.Message}";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"An error occurred: {ex.Message}";
+                return result;
+            }
+        }
+
+        public async Task<OperationResult> AddLyricsToTrackAsync(string trackId, string lyricsText)
+        {
+            var result = new OperationResult();
+
+            if (string.IsNullOrEmpty(trackId) || string.IsNullOrEmpty(lyricsText))
+            {
+                result.Success = false;
+                result.ErrorMessage = "Track ID or lyrics text is null or empty.";
+                return result;
+            }
+
+            try
+            {
+                var track = await _context.Tracks.FirstOrDefaultAsync(t => t.TrackId == trackId);
+                if (track == null)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = $"Track with ID '{trackId}' not found.";
+                    return result;
+                }
+
+                var lyric = new Lyric { Text = lyricsText };
+
+                track.Lyrics!.Add(lyric);
+
+                await _context.SaveChangesAsync();
+
+                result.Success = true;
+                result.Message = $"Lyrics added to track '{track.Title}' successfully.";
+                return result;
+            }
+            catch (DbUpdateException ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Database update error: {ex.Message}";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"An error occurred: {ex.Message}";
+                return result;
+            }
+        }
 
         #endregion
 

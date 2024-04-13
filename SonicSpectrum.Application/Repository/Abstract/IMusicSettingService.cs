@@ -13,6 +13,8 @@ namespace SonicSpectrum.Application.Repository.Abstract
         Task<OperationResult> AddArtistAsync(ArtistDTO artistDto);
         Task<OperationResult> AddGenreAsync(GenreDTO genreDto);
         Task<OperationResult> AddTrackAsync(TrackDTO trackDto);
+        Task<OperationResult> AddGenreToTrackAsync(string trackId, string genreName);
+        Task<OperationResult> AddLyricsToTrackAsync(string trackId, string lyricsText);
 
         #endregion
 
@@ -37,6 +39,9 @@ namespace SonicSpectrum.Application.Repository.Abstract
         #region get
 
         Task<IEnumerable<object>> GetAllTracksAsync(int pageNumber, int pageSize);
+        Task<IEnumerable<object>> GetAllArtistsAsync(int pageNumber, int pageSize);
+        Task<IEnumerable<object>> GetAllAlbumsForArtistAsync(string artistId, int pageNumber, int pageSize);
+        Task<IEnumerable<object>> GetMusicFromAlbum(string albumId, int pageNumber, int pageSize);
 
         #endregion
 

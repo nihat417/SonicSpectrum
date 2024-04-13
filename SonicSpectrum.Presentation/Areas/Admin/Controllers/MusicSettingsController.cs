@@ -43,6 +43,28 @@ namespace SonicSpectrum.Presentation.Areas.Admin.Controllers
             return BadRequest(result.ErrorMessage);
         }
 
+        [HttpPost("addGenreToTrack/{trackId}/{genreName}")]
+        public async Task<IActionResult> AddGenreToTrack(string trackId, string genreName)
+        {
+            var operationResult = await _musicSettingService.AddGenreToTrackAsync(trackId, genreName);
+
+            if (operationResult.Success) return Ok(operationResult.Message);
+            else return BadRequest(operationResult.ErrorMessage);
+        }
+
+
+        [HttpPost("addLyricsToTrack/{trackId}")]
+        public async Task<IActionResult> AddLyricsToTrack(string trackId, [FromBody] string lyricsText)
+        {
+            if (string.IsNullOrEmpty(lyricsText))return BadRequest("Lyrics text is null or empty.");
+            var operationResult = await _musicSettingService.AddLyricsToTrackAsync(trackId, lyricsText);
+            if (operationResult.Success) return Ok(operationResult.Message);
+            else return BadRequest(operationResult.ErrorMessage);
+        }
+
+
+
+
         #endregion
 
         #region Put
