@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SonicSpectrum.Application.DTOs;
 using SonicSpectrum.Application.Repository.Abstract;
 
 namespace SonicSpectrum.Presentation.Areas.User.Controllers
@@ -69,5 +70,34 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
             }
         }
 
+        [HttpPost("createPlaylist")]
+        public async Task<IActionResult> CreatePlaylistAsync([FromForm] PlaylistDTO requestDto)
+        {
+            try
+            {
+                var result = await _musicSettingService.CreatePlaylistAsync(requestDto);
+                if (result.Success) return Ok(result.Message);
+                else return BadRequest(result.ErrorMessage);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("addTrackPlaylist")]
+        public async Task<IActionResult> AddTrackToPlaylistAsync([FromBody] TrackPlaylistDTO requestDto)
+        {
+            try
+            {
+                var result = await _musicSettingService.AddTrackToPlaylistAsync(requestDto);
+                if (result.Success) return Ok(result.Message);
+                else return BadRequest(result.ErrorMessage);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

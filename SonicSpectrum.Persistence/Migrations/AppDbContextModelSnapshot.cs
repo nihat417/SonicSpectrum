@@ -201,6 +201,9 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("ArtistImage")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -242,6 +245,29 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.ToTable("Lyrics");
                 });
 
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Playlist", b =>
+                {
+                    b.Property<string>("PlaylistId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PlaylistImage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("PlaylistId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Playlists");
+                });
+
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.Track", b =>
                 {
                     b.Property<string>("TrackId")
@@ -260,6 +286,9 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PlaylistId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -269,6 +298,8 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.HasIndex("AlbumId");
 
                     b.HasIndex("ArtistId");
+
+                    b.HasIndex("PlaylistId");
 
                     b.ToTable("Tracks");
                 });
@@ -439,6 +470,17 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.Navigation("Track");
                 });
 
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Playlist", b =>
+                {
+                    b.HasOne("SonicSpectrum.Domain.Entities.User", "User")
+                        .WithMany("Playlists")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.Track", b =>
                 {
                     b.HasOne("SonicSpectrum.Domain.Entities.Album", "Album")
@@ -448,6 +490,10 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.HasOne("SonicSpectrum.Domain.Entities.Artist", "Artist")
                         .WithMany("Tracks")
                         .HasForeignKey("ArtistId");
+
+                    b.HasOne("SonicSpectrum.Domain.Entities.Playlist", null)
+                        .WithMany("Tracks")
+                        .HasForeignKey("PlaylistId");
 
                     b.Navigation("Album");
 
@@ -466,11 +512,21 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.Navigation("Tracks");
                 });
 
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Playlist", b =>
+                {
+                    b.Navigation("Tracks");
+                });
+
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.Track", b =>
                 {
                     b.Navigation("Albums");
 
                     b.Navigation("Lyrics");
+                });
+
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.User", b =>
+                {
+                    b.Navigation("Playlists");
                 });
 #pragma warning restore 612, 618
         }

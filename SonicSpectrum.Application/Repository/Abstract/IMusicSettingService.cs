@@ -16,6 +16,9 @@ namespace SonicSpectrum.Application.Repository.Abstract
         Task<OperationResult> AddGenreToTrackAsync(string trackId, string genreName);
         Task<OperationResult> AddLyricsToTrackAsync(string trackId, string lyricsText);
 
+        Task<OperationResult> CreatePlaylistAsync(PlaylistDTO requestDto);
+        Task<OperationResult> AddTrackToPlaylistAsync(TrackPlaylistDTO requestDto);
+
         #endregion
 
         #region edit

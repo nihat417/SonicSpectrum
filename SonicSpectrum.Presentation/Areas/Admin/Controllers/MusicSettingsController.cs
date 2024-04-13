@@ -12,7 +12,7 @@ namespace SonicSpectrum.Presentation.Areas.Admin.Controllers
         #region Post
 
         [HttpPost("addArtist")]
-        public async Task<IActionResult> AddArtist([FromBody] ArtistDTO artistDto)
+        public async Task<IActionResult> AddArtist([FromForm] ArtistDTO artistDto)
         {
             var result = await _musicSettingService.AddArtistAsync(artistDto);
             if (result.Success) return Ok(result.Message);

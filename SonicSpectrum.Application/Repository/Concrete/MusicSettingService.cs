@@ -99,7 +99,6 @@ namespace SonicSpectrum.Application.Repository.Concrete
         }
 
 
-
         #endregion
 
 
@@ -127,6 +126,14 @@ namespace SonicSpectrum.Application.Repository.Concrete
 
             try
             {
+                var existingAlbum = await _context.Albums.FirstOrDefaultAsync(a => a.ArtistId == artist.Id && a.Title == albumDto.Title);
+                if (existingAlbum != null)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = "Album with the same title already exists for this artist.";
+                    return result;
+                }
+
                 var album = new Album { Title = albumDto.Title, ArtistId = artist.Id };
                 await _context.Albums.AddAsync(album);
                 await _context.SaveChangesAsync();
@@ -162,7 +169,12 @@ namespace SonicSpectrum.Application.Repository.Concrete
 
             try
             {
-                var artist = new Artist { Name = artistDto.Name };
+                var artist = new Artist { 
+                    Name = artistDto.Name,
+                    ArtistImage = (artistDto.ArtistImage != null) ? 
+                    await UploadFileHelper.UploadFile(artistDto.ArtistImage!, "artistphoto", artistDto.Name) : 
+                    "https://musicstrgac.blob.core.windows.net/artistphoto/defPhoto.jpg",
+                };
                 await _context.Artists.AddAsync(artist);
                 await _context.SaveChangesAsync();
 
@@ -416,6 +428,115 @@ namespace SonicSpectrum.Application.Repository.Concrete
             }
         }
 
+        public async Task<OperationResult> CreatePlaylistAsync(PlaylistDTO requestDto)
+        {
+            var result = new OperationResult();
+
+            if (string.IsNullOrEmpty(requestDto.UserId) || string.IsNullOrEmpty(requestDto.PlaylistName))
+            {
+                result.Success = false;
+                result.ErrorMessage = "User ID or playlist name is null or empty.";
+                return result;
+            }
+
+            try
+            {
+                var existingPlaylist = await _context.Playlists.FirstOrDefaultAsync(p => p.UserId == requestDto.UserId && p.Name == requestDto.PlaylistName);
+                if (existingPlaylist != null)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = "Playlist with the same name already exists for this user.";
+                    return result;
+                }
+
+                var playlist = new Playlist
+                {
+                    Name = requestDto.PlaylistName,
+                    UserId = requestDto.UserId,
+                    PlaylistImage = (requestDto.PlaylistImage != null) ?
+                    await UploadFileHelper.UploadFile(requestDto.PlaylistImage!, "playlistphoto", requestDto.PlaylistName) :
+                    "https://musicstrgac.blob.core.windows.net/playlistphoto/defplaylist.jpg",
+                };
+
+                _context.Playlists.Add(playlist);
+                await _context.SaveChangesAsync();
+
+                result.Success = true;
+                result.Message = "Playlist created successfully.";
+                return result;
+            }
+            catch (DbUpdateException ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Database update error: {ex.Message}";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"An error occurred: {ex.Message}";
+                return result;
+            }
+        }
+
+        public async Task<OperationResult> AddTrackToPlaylistAsync(TrackPlaylistDTO requestDto)
+        {
+            var result = new OperationResult();
+
+            if (string.IsNullOrEmpty(requestDto.PlaylistId) || string.IsNullOrEmpty(requestDto.TrackId))
+            {
+                result.Success = false;
+                result.ErrorMessage = "Playlist ID or track ID is null or empty.";
+                return result;
+            }
+
+            try
+            {
+                var playlist = await _context.Playlists.Include(p => p.Tracks).FirstOrDefaultAsync(p => p.PlaylistId == requestDto.PlaylistId);
+                var track = await _context.Tracks.FindAsync(requestDto.TrackId);
+
+                if (playlist == null)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = $"Playlist with ID '{requestDto.PlaylistId}' not found.";
+                    return result;
+                }
+
+                if (track == null)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = $"Track with ID '{requestDto.TrackId}' not found.";
+                    return result;
+                }
+
+                if (playlist.Tracks.Any(t => t.TrackId == requestDto.TrackId))
+                {
+                    result.Success = false;
+                    result.ErrorMessage = "Track already exists in the playlist.";
+                    return result;
+                }
+
+                playlist.Tracks.Add(track);
+                await _context.SaveChangesAsync();
+
+                result.Success = true;
+                result.Message = "Track added to playlist successfully.";
+                return result;
+            }
+            catch (DbUpdateException ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"Database update error: {ex.Message}";
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.ErrorMessage = $"An error occurred: {ex.Message}";
+                return result;
+            }
+        }
+
         #endregion
 
         #region Edit
@@ -640,8 +761,6 @@ namespace SonicSpectrum.Application.Repository.Concrete
             }
         }
 
-
-
         #endregion
 
         #region Delete
@@ -768,7 +887,6 @@ namespace SonicSpectrum.Application.Repository.Concrete
 
             return result;
         }
-
 
         #endregion
     }
