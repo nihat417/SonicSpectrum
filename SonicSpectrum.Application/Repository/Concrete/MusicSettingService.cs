@@ -98,6 +98,51 @@ namespace SonicSpectrum.Application.Repository.Concrete
             }
         }
 
+        public async Task<IEnumerable<object>> GetMusicFromPlaylist(string playlistId, int pageNumber, int pageSize)
+        {
+            var playlist = await _context.Playlists.FindAsync(playlistId);
+            if (playlist == null) return Enumerable.Empty<object>();
+
+            var trackIds = playlist.Tracks.Select(pTrack => pTrack.TrackId).ToList();
+
+            var tracks = await _context.Tracks
+                                        .Where(track => trackIds.Contains(track.TrackId))
+                                        .Skip((pageNumber - 1) * pageSize)
+                                        .Take(pageSize)
+                                        .Select(track => new
+                                        {
+                                            track.TrackId,
+                                            track.Title,
+                                            track.FilePath,
+                                            track.ImagePath,
+                                            track.ArtistId,
+                                            track.AlbumId
+                                        })
+                                        .ToListAsync();
+            return tracks;
+        }
+
+        public async Task<IEnumerable<object>> GetPlaylistFromUser(string userId, int pageNumber, int pageSize)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return Enumerable.Empty<object>();
+
+            var playlists = await _context.Playlists
+                                        .Where(playlist => playlist.UserId == userId)
+                                        .OrderBy(playlist => playlist.Name)
+                                        .Skip((pageNumber - 1) * pageSize)
+                                        .Take(pageSize)
+                                        .Select(playlist => new
+                                        {
+                                            playlist.PlaylistId,
+                                            playlist.Name,
+                                            playlist.PlaylistImage
+                                        })
+                                .ToListAsync();
+            return playlists;
+        }
+
+
 
         #endregion
 

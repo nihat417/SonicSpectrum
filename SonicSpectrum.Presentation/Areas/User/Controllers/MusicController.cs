@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SonicSpectrum.Application.DTOs;
 using SonicSpectrum.Application.Repository.Abstract;
+using SonicSpectrum.Domain.Entities;
 
 namespace SonicSpectrum.Presentation.Areas.User.Controllers
 {
@@ -93,6 +94,37 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
                 var result = await _musicSettingService.AddTrackToPlaylistAsync(requestDto);
                 if (result.Success) return Ok(result.Message);
                 else return BadRequest(result.ErrorMessage);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("user/{userId}/playlists")]
+        public async Task<IActionResult> GetPlaylistsFromUser(string userId, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var playlists = await _musicSettingService.GetPlaylistFromUser(userId, pageNumber, pageSize);
+                if(playlists == null) return NotFound();
+                else return Ok(playlists);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+
+            }
+        }
+
+        [HttpGet("playlist/{playlistId}/tracks")]
+        public async Task<IActionResult> GetMusicFromPlaylist(string playlistId, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var tracks = await _musicSettingService.GetMusicFromPlaylist(playlistId, pageNumber, pageSize);
+                if (tracks == null) return NotFound();
+                else return Ok(tracks);
             }
             catch (Exception ex)
             {
