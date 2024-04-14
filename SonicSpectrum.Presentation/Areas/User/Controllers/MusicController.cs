@@ -9,6 +9,7 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
     [ApiController]
     public class MusicController (IMusicSettingService _musicSettingService) : ControllerBase
     {
+        #region getmethods
 
         [HttpGet("allmusics")]
         public async Task<IActionResult> GetAllMusics(int pageNumber = 1, int pageSize = 10)
@@ -39,7 +40,6 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
             }
         }
 
-
         [HttpGet("getallalbumsforartist/{artistId}")]
         public async Task<ActionResult<IEnumerable<object>>> GetAllAlbumsForArtist(string artistId, int pageNumber = 1, int pageSize = 10)
         {
@@ -55,7 +55,6 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
             }
         }
 
-
         [HttpGet("GetMusicForAlbum/{albumId}")]
         public async Task<ActionResult<IEnumerable<object>>> GetMusicForAlbum(string albumId, int pageNumber = 1, int pageSize = 10)
         {
@@ -64,36 +63,6 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
                 var tracks = await _musicSettingService.GetMusicFromAlbum(albumId, pageNumber, pageSize);
                 if (tracks == null) return NotFound();
                 return Ok(tracks);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpPost("createPlaylist")]
-        public async Task<IActionResult> CreatePlaylistAsync([FromForm] PlaylistDTO requestDto)
-        {
-            try
-            {
-                var result = await _musicSettingService.CreatePlaylistAsync(requestDto);
-                if (result.Success) return Ok(result.Message);
-                else return BadRequest(result.ErrorMessage);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpPost("addTrackPlaylist")]
-        public async Task<IActionResult> AddTrackToPlaylistAsync([FromBody] TrackPlaylistDTO requestDto)
-        {
-            try
-            {
-                var result = await _musicSettingService.AddTrackToPlaylistAsync(requestDto);
-                if (result.Success) return Ok(result.Message);
-                else return BadRequest(result.ErrorMessage);
             }
             catch (Exception ex)
             {
@@ -131,5 +100,41 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        #endregion
+
+        #region postmethods
+
+        [HttpPost("createPlaylist")]
+        public async Task<IActionResult> CreatePlaylistAsync([FromForm] PlaylistDTO requestDto)
+        {
+            try
+            {
+                var result = await _musicSettingService.CreatePlaylistAsync(requestDto);
+                if (result.Success) return Ok(result.Message);
+                else return BadRequest(result.ErrorMessage);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("addTrackPlaylist")]
+        public async Task<IActionResult> AddTrackToPlaylistAsync([FromBody] TrackPlaylistDTO requestDto)
+        {
+            try
+            {
+                var result = await _musicSettingService.AddTrackToPlaylistAsync(requestDto);
+                if (result.Success) return Ok(result.Message);
+                else return BadRequest(result.ErrorMessage);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        #endregion
     }
 }
