@@ -12,21 +12,21 @@ namespace SonicSpectrum.Application.Repository.Concrete
     {
         public async Task<LoginResponse> Login(LoginDTO userDTO)
         {
-            if (userDTO == null)  return new LoginResponse(false, null!, "Login model is empty");
+            if (userDTO == null)  return new LoginResponse(false, null!,null!,"Login model is empty");
 
             var getUser = await userManager.FindByEmailAsync(userDTO.Email);
 
             if (getUser == null)
-                return new LoginResponse(false, null!, "User not found");
+                return new LoginResponse(false, null!,null!,"User not found");
 
             bool checkUserPasswords = await userManager.CheckPasswordAsync(getUser, userDTO.Password);
             if (!checkUserPasswords)
-                return new LoginResponse(false, null!, "Invalid email/password");
+                return new LoginResponse(false, null!,null!,"Invalid email/password");
 
             var getUserRole = await userManager.GetRolesAsync(getUser);
             var userSession = new UserSession(getUser.Id, getUser.UserName,getUser.FullName,getUser.Age,getUser.Email, getUserRole.First());
-            string token = _jwtTokenService.CreateToken(userSession);
-            return new LoginResponse(true, token!, "Login completed");
+            (string accsesToken,string refreshToken )= _jwtTokenService.CreateToken(userSession);
+            return new LoginResponse(true, accsesToken!,refreshToken, "Login completed");
         }
 
         public async Task<GeneralResponse> Register(RegisterDTO userDTO)

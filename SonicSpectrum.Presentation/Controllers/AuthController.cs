@@ -1,5 +1,4 @@
-﻿using Azure;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SonicSpectrum.Application.DTOs;
 using SonicSpectrum.Application.Models;
@@ -12,6 +11,8 @@ namespace SonicSpectrum.Presentation.Controllers
     [ApiController]
     public class AuthController(IAuthService _authService, UserManager<User> _userManager, IEmailService _emailService) : ControllerBase
     {
+        #region AuthPost
+
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDTO loginDTO)
         {
@@ -44,9 +45,7 @@ namespace SonicSpectrum.Presentation.Controllers
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
-            {
                 return BadRequest("User not found or email is not confirmed.");
-            }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
             var resetLink = Url.Action("ResetPassword", "Auth", new { token, email }, Request.Scheme);
@@ -87,6 +86,8 @@ namespace SonicSpectrum.Presentation.Controllers
             else
                 return BadRequest("Failed to change password.");
         }
+
+        #endregion
 
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string token, string email)
