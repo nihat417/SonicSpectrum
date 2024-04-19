@@ -41,6 +41,8 @@ namespace SonicSpectrum.Application.Repository.Abstract
 
         #region get
 
+        Task<object> GetTrackById(string id);
+
         Task<IEnumerable<object>> GetAllTracksAsync(int pageNumber, int pageSize);
         Task<IEnumerable<object>> GetAllArtistsAsync(int pageNumber, int pageSize);
         Task<IEnumerable<object>> GetAllAlbumsForArtistAsync(string artistId, int pageNumber, int pageSize);

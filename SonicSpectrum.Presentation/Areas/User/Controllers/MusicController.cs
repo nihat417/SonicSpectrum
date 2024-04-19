@@ -11,6 +11,29 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
     {
         #region getmethods
 
+        [HttpGet("getTrackById/{trackId}")]
+        public async Task<IActionResult> GetTrackById(string trackId)
+        {
+            try
+            {
+                var music = await _musicSettingService.GetTrackById(trackId);
+                if (music == null) return NotFound();
+                return Ok(music);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         [HttpGet("allmusics")]
         public async Task<IActionResult> GetAllMusics(int pageNumber = 1, int pageSize = 10)
         {

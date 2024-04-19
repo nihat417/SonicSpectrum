@@ -1,18 +1,46 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using SonicSpectrum.Application.DTOs;
 using SonicSpectrum.Application.Models;
 using SonicSpectrum.Application.Repository.Abstract;
 using SonicSpectrum.Application.Services;
 using SonicSpectrum.Domain.Entities;
 using SonicSpectrum.Persistence.Data;
-using System.Diagnostics;
 
 namespace SonicSpectrum.Application.Repository.Concrete
 {
     public class MusicSettingService(AppDbContext _context) : IMusicSettingService
     {
         #region get
+
+        public async Task<object> GetTrackById(string musicId)
+        {
+            if (string.IsNullOrEmpty(musicId)) throw new ArgumentNullException(nameof(musicId), "Music ID cannot be null or empty.");
+
+            try
+            {
+                var music = await _context.Tracks.Where(m => m.TrackId == musicId)
+                                                 .Select(t=> new { 
+                                                     t.TrackId,
+                                                     t.Title,
+                                                     t.AlbumId,
+                                                     AlbumTitle = t.Album!.Title,
+                                                     t.ArtistId,
+                                                     t.Artist!.Name,
+                                                     t.FilePath,
+                                                     t.ImagePath,
+                                                 })
+                                                 .FirstOrDefaultAsync();
+
+                if (music == null) throw new KeyNotFoundException($"Music with ID '{musicId}' not found.");
+
+                return music;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error occurred while retrieving music with ID '{musicId}': {ex.Message}");
+                throw;
+            }
+        }
 
         public async Task<IEnumerable<object>> GetAllTracksAsync(int pageNumber, int pageSize)
         {
