@@ -18,7 +18,8 @@ namespace SonicSpectrum.Application.Repository.Concrete
 
             try
             {
-                var music = await _context.Tracks.Where(m => m.TrackId == musicId)
+                var music = await _context.Tracks.AsNoTracking()
+                                                 .Where(m => m.TrackId == musicId)
                                                  .Select(t=> new { 
                                                      t.TrackId,
                                                      t.Title,
