@@ -45,19 +45,20 @@ namespace SonicSpectrum.Application.Repository.Concrete
         public async Task<IEnumerable<object>> GetAllTracksAsync(int pageNumber, int pageSize)
         {
             var tracks = await _context.Tracks
-                                .Skip((pageNumber - 1) * pageSize)
-                                .Take(pageSize)
-                                .Select(t => new {
-                                    t.TrackId,
-                                    t.Title,
-                                    t.FilePath,
-                                    t.ImagePath,
-                                    ArtistName = t.Artist!.Name,
-                                    t.ArtistId,
-                                    t.AlbumId,
-                                    AlbumTitle = t.Album!.Title,
-                                })
-                                .ToListAsync();
+                .AsNoTracking() 
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(t => new {
+                    t.TrackId,
+                    t.Title,
+                    t.FilePath,
+                    t.ImagePath,
+                    ArtistName = t.Artist!.Name,
+                    t.ArtistId,
+                    t.AlbumId,
+                    AlbumTitle = t.Album!.Title,
+                })
+                .ToListAsync();
 
             return tracks;
         }
@@ -68,6 +69,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
             if (artist == null) return Enumerable.Empty<object>();
 
             var albums = await _context.Albums
+                                        .AsNoTracking()
                                         .Where(album => album.ArtistId == artistId)
                                         .Skip((pageNumber - 1) * pageSize)
                                         .Take(pageSize)
@@ -87,6 +89,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
             if(album == null) return Enumerable.Empty<object>();
 
             var tracks = await _context.Tracks
+                                        .AsNoTracking()
                                         .Where(track => track.AlbumId == albumId)
                                         .Skip((pageNumber - 1) * pageSize)
                                         .Take(pageSize)
@@ -108,6 +111,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
             try
             {
                 var artists = await _context.Artists
+                    .AsNoTracking()
                     .OrderBy(a => a.Name) 
                     .Skip((pageNumber - 1) * pageSize) 
                     .Take(pageSize) 
@@ -134,6 +138,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
             var trackIds = playlist.Tracks.Select(pTrack => pTrack.TrackId).ToList();
 
             var tracks = await _context.Tracks
+                                        .AsNoTracking()
                                         .Where(track => trackIds.Contains(track.TrackId))
                                         .Skip((pageNumber - 1) * pageSize)
                                         .Take(pageSize)
@@ -156,6 +161,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
             if (user == null) return Enumerable.Empty<object>();
 
             var playlists = await _context.Playlists
+                                        .AsNoTracking()
                                         .Where(playlist => playlist.UserId == userId)
                                         .OrderBy(playlist => playlist.Name)
                                         .Skip((pageNumber - 1) * pageSize)
@@ -171,9 +177,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
         }
 
 
-
         #endregion
-
 
         #region Add
 
