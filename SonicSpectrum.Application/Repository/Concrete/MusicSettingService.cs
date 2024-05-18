@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using SonicSpectrum.Application.DTOs;
 using SonicSpectrum.Application.Models;
 using SonicSpectrum.Application.Repository.Abstract;
@@ -45,20 +46,24 @@ namespace SonicSpectrum.Application.Repository.Concrete
 
         public async Task<IEnumerable<object>> GetAllTracksAsync(int pageNumber, int pageSize)
         {
+            var offset = (pageNumber - 1) * pageSize;
+            var query = @"
+                SELECT t.TrackId, t.Title, t.FilePath, t.ImagePath,t.PlaylistId, a.Name AS ArtistName, 
+                t.ArtistId, t.AlbumId, al.Title AS AlbumTitle
+                FROM Tracks t
+                JOIN Artists a ON t.ArtistId = a.Id
+                JOIN Albums al ON t.AlbumId = al.AlbumId
+                ORDER BY t.TrackId
+                OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+
+            var parameters = new[]
+            {
+                new SqlParameter("@Offset", offset),
+                new SqlParameter("@PageSize", pageSize)
+            };
+
             var tracks = await _context.Tracks
-                .AsNoTracking() 
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .Select(t => new {
-                    t.TrackId,
-                    t.Title,
-                    t.FilePath,
-                    t.ImagePath,
-                    ArtistName = t.Artist!.Name,
-                    t.ArtistId,
-                    t.AlbumId,
-                    AlbumTitle = t.Album!.Title,
-                })
+                .FromSqlRaw(query, parameters)
                 .ToListAsync();
 
             return tracks;
