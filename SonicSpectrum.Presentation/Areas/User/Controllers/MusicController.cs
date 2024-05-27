@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SonicSpectrum.Application.DTOs;
 using SonicSpectrum.Application.Repository.Abstract;
-using SonicSpectrum.Domain.Entities;
 
 namespace SonicSpectrum.Presentation.Areas.User.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MusicController (IMusicSettingService _musicSettingService) : ControllerBase
+    public class MusicController (IUnitOfWork _unitOfWork) : ControllerBase
     {
         #region getmethods
 
@@ -16,7 +15,7 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
         {
             try
             {
-                var music = await _musicSettingService.GetTrackById(trackId);
+                var music = await _unitOfWork.MusicSettingService.GetTrackById(trackId);
                 if (music == null) return NotFound();
                 return Ok(music);
             }
@@ -39,7 +38,7 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
         {
             try
             {
-                var tracks = await _musicSettingService.GetAllTracksAsync(pageNumber, pageSize);
+                var tracks = await _unitOfWork.MusicSettingService.GetAllTracksAsync(pageNumber, pageSize);
                 return Ok(tracks);
             }
             catch (Exception ex)
@@ -53,7 +52,7 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
         {
             try
             {
-                var artists = await _musicSettingService.GetAllArtistsAsync(pageNumber, pageSize);
+                var artists = await _unitOfWork.MusicSettingService.GetAllArtistsAsync(pageNumber, pageSize);
                 if (artists == null) return NotFound();
                 return Ok(artists);
             }
@@ -68,7 +67,7 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
         {
             try
             {
-                var albums = await _musicSettingService.GetAllAlbumsForArtistAsync(artistId, pageNumber, pageSize);
+                var albums = await _unitOfWork.MusicSettingService.GetAllAlbumsForArtistAsync(artistId, pageNumber, pageSize);
                 if (albums == null || !albums.Any()) return NotFound();
                 return Ok(albums);
             }
@@ -83,7 +82,7 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
         {
             try
             {
-                var tracks = await _musicSettingService.GetMusicFromAlbum(albumId, pageNumber, pageSize);
+                var tracks = await _unitOfWork.MusicSettingService.GetMusicFromAlbum(albumId, pageNumber, pageSize);
                 if (tracks == null) return NotFound();
                 return Ok(tracks);
             }
@@ -98,7 +97,7 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
         {
             try
             {
-                var playlists = await _musicSettingService.GetPlaylistFromUser(userId, pageNumber, pageSize);
+                var playlists = await _unitOfWork.MusicSettingService.GetPlaylistFromUser(userId, pageNumber, pageSize);
                 if(playlists == null) return NotFound();
                 else return Ok(playlists);
             }
@@ -114,7 +113,7 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
         {
             try
             {
-                var tracks = await _musicSettingService.GetMusicFromPlaylist(playlistId, pageNumber, pageSize);
+                var tracks = await _unitOfWork.MusicSettingService.GetMusicFromPlaylist(playlistId, pageNumber, pageSize);
                 if (tracks == null) return NotFound();
                 else return Ok(tracks);
             }
@@ -133,7 +132,7 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
         {
             try
             {
-                var result = await _musicSettingService.CreatePlaylistAsync(requestDto);
+                var result = await _unitOfWork.MusicSettingService.CreatePlaylistAsync(requestDto);
                 if (result.Success) return Ok(result.Message);
                 else return BadRequest(result.ErrorMessage);
             }
@@ -148,7 +147,7 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
         {
             try
             {
-                var result = await _musicSettingService.AddTrackToPlaylistAsync(requestDto);
+                var result = await _unitOfWork.MusicSettingService.AddTrackToPlaylistAsync(requestDto);
                 if (result.Success) return Ok(result.Message);
                 else return BadRequest(result.ErrorMessage);
             }

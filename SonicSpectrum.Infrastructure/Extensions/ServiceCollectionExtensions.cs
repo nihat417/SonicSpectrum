@@ -27,9 +27,8 @@ namespace SonicSpectrum.Infrastructure.Extensions
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
             });
 
-            services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IMusicSettingService, MusicSettingService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             services.AddSingleton(configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>());
             services.AddSingleton<JwtTokenService>();
 
