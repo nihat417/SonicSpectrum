@@ -88,6 +88,8 @@ namespace SonicSpectrum.Presentation.Controllers
 
         #endregion
 
+        
+
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string token, string email)
         {

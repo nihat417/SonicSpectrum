@@ -69,6 +69,29 @@ namespace SonicSpectrum.Application.Repository.Concrete
             return tracks;
         }
 
+        public async Task<IEnumerable<object>> GetRandomTracks()
+        {
+            var random = new Random();
+            var tracks = await _context.Tracks
+                .Select(t => new
+                {
+                    t.TrackId,
+                    t.Title,
+                    t.AlbumId,
+                    AlbumTitle = t.Album!.Title,
+                    t.ArtistId,
+                    ArtistName = t.Artist!.Name,
+                    t.FilePath,
+                    t.ImagePath,
+                })
+                .ToListAsync();
+
+            var randomTracks = tracks.OrderBy(x => random.Next()).Take(5).ToList();
+            return randomTracks;
+        }
+
+
+
         public async Task<IEnumerable<object>> GetAllAlbumsForArtistAsync(string artistId, int pageNumber, int pageSize)
         {
             var artist = await _context.Artists.FindAsync(artistId);

@@ -94,7 +94,7 @@ namespace SonicSpectrum.Presentation.Areas.Admin.Controllers
         }
 
         [HttpPut("editTrack/{trackId}")]
-        public async Task<IActionResult> EditTrack(string trackId, [FromBody] TrackDTO trackDto)
+        public async Task<IActionResult> EditTrack(string trackId, [FromForm] TrackDTO trackDto)
         {
             var result = await _unitOfWork.MusicSettingService.EditTrackAsync(trackId, trackDto);
             if (result.Success) return Ok(result.Message);

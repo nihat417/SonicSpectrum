@@ -47,6 +47,20 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
             }
         }
 
+        [HttpGet("randomtracks")]
+        public async Task<IActionResult> GetRandomMusic()
+        {
+            try
+            {
+                var randomTracks = await _unitOfWork.MusicSettingService.GetRandomTracks();
+                return Ok(randomTracks);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
+        }
+
         [HttpGet("allartists")]
         public async Task<ActionResult<IEnumerable<object>>> GetAllArtists(int pageNumber = 1, int pageSize = 10)
         {
