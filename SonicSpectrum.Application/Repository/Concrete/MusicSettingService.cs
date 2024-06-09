@@ -48,11 +48,11 @@ namespace SonicSpectrum.Application.Repository.Concrete
         {
             var offset = (pageNumber - 1) * pageSize;
             var query = @"
-                SELECT t.TrackId, t.Title, t.FilePath, t.ImagePath,t.PlaylistId, a.Name AS ArtistName, 
-                t.ArtistId, t.AlbumId, al.Title AS AlbumTitle
+                SELECT t.TrackId, t.Title, t.FilePath, t.ImagePath, a.Name AS ArtistName, 
+                       t.ArtistId, t.AlbumId, al.Title AS AlbumTitle
                 FROM Tracks t
-                JOIN Artists a ON t.ArtistId = a.Id
-                JOIN Albums al ON t.AlbumId = al.AlbumId
+                LEFT JOIN Artists a ON t.ArtistId = a.Id
+                LEFT JOIN Albums al ON t.AlbumId = al.AlbumId
                 ORDER BY t.TrackId
                 OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
 
@@ -64,10 +64,22 @@ namespace SonicSpectrum.Application.Repository.Concrete
 
             var tracks = await _context.Tracks
                 .FromSqlRaw(query, parameters)
+                .Select(t => new
+                {
+                    t.TrackId,
+                    t.Title,
+                    t.FilePath,
+                    t.ImagePath,
+                    ArtistName = t.Artist!.Name,
+                    t.ArtistId,
+                    t.AlbumId,
+                    AlbumTitle = t.Album!.Title
+                })
                 .ToListAsync();
 
             return tracks;
         }
+
 
         public async Task<IEnumerable<object>> GetRandomTracks()
         {
@@ -159,6 +171,8 @@ namespace SonicSpectrum.Application.Repository.Concrete
             }
         }
 
+
+        //bax sehvliy
         public async Task<IEnumerable<object>> GetMusicFromPlaylist(string playlistId, int pageNumber, int pageSize)
         {
             var playlist = await _context.Playlists.FindAsync(playlistId);
@@ -240,7 +254,13 @@ namespace SonicSpectrum.Application.Repository.Concrete
                     return result;
                 }
 
-                var album = new Album { Title = albumDto.Title, ArtistId = artist.Id };
+                var album = new Album { 
+                    Title = albumDto.Title,
+                    ArtistId = artist.Id, 
+                    AlbumImage = (albumDto.AlbumImage != null ) ? await UploadFileHelper.UploadFile(albumDto.AlbumImage!, "albumphoto", albumDto.Title) :
+                    "https://seventysoundst.blob.core.windows.net/albumphoto/defalbumphoto.jpg",
+                };
+
                 await _context.Albums.AddAsync(album);
                 await _context.SaveChangesAsync();
 
@@ -278,8 +298,8 @@ namespace SonicSpectrum.Application.Repository.Concrete
                 var artist = new Artist { 
                     Name = artistDto.Name,
                     ArtistImage = (artistDto.ArtistImage != null) ? 
-                    await UploadFileHelper.UploadFile(artistDto.ArtistImage!, "artistphoto", artistDto.Name) : 
-                    "https://musicstrgac.blob.core.windows.net/artistphoto/defPhoto.jpg",
+                    await UploadFileHelper.UploadFile(artistDto.ArtistImage!, "artistphoto", artistDto.Name) :
+                    "https://seventysoundst.blob.core.windows.net/artistphoto/defartistphoto.jpg",
                 };
                 await _context.Artists.AddAsync(artist);
                 await _context.SaveChangesAsync();
@@ -318,7 +338,10 @@ namespace SonicSpectrum.Application.Repository.Concrete
                 var existingGenre = await _context.Genres.FirstOrDefaultAsync(g => g.Name == genreDto.Name);
                 if (existingGenre == null)
                 {
-                    var genre = new Genre { Name = genreDto.Name };
+                    var genre = new Genre {
+                        Name = genreDto.Name,GenreImage = (genreDto.GenreImage != null) ?
+                    await UploadFileHelper.UploadFile(genreDto.GenreImage!, "genrephoto", genreDto.Name) 
+                    : "https://seventysoundst.blob.core.windows.net/albumphoto/defalbumphoto.jpg"};
                     await _context.Genres.AddAsync(genre);
                     await _context.SaveChangesAsync();
                     result.Success = true;
@@ -642,7 +665,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
                 return result;
             }
         }
-
+        
         #endregion
 
         #region Edit
@@ -883,6 +906,8 @@ namespace SonicSpectrum.Application.Repository.Concrete
                     _context.Artists.Remove(artist);
                     await _context.SaveChangesAsync();
 
+                    await UploadFileHelper.DeleteFile(artist.ArtistImage!, "artistphoto");
+
                     result.Success = true;
                     result.Message = "Artist deleted successfully.";
                 }
@@ -913,6 +938,8 @@ namespace SonicSpectrum.Application.Repository.Concrete
                     _context.Albums.Remove(album);
                     await _context.SaveChangesAsync();
 
+                    await UploadFileHelper.DeleteFile(album.AlbumImage!, "albumphoto");
+
                     result.Success = true;
                     result.Message = "Album deleted successfully.";
                 }
@@ -942,6 +969,8 @@ namespace SonicSpectrum.Application.Repository.Concrete
                 {
                     _context.Genres.Remove(genre);
                     await _context.SaveChangesAsync();
+
+                    await UploadFileHelper.DeleteFile(genre.GenreImage!, "genrephoto");
 
                     result.Success = true;
                     result.Message = "Genre deleted successfully.";

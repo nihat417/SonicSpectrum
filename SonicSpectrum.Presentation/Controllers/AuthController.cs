@@ -88,7 +88,66 @@ namespace SonicSpectrum.Presentation.Controllers
 
         #endregion
 
-        
+        #region UpdateUser
+
+
+        [HttpPost("ChangeNickname")]
+        public async Task<IActionResult> ChangeNickname(string email, string newNickname)
+        {
+            var user = await _unitOfWork.UserManager.FindByEmailAsync(email);
+            if (user == null)
+                return NotFound("User not found.");
+
+            user.UserName = newNickname;
+            var result = await _unitOfWork.UserManager.UpdateAsync(user);
+            if (result.Succeeded)
+                return Ok("Nickname updated successfully.");
+            else
+                return BadRequest("Failed to update nickname.");
+        }
+
+
+        /*[HttpPost("ChangeProfilePhoto")]
+        public async Task<IActionResult> ChangeProfilePhoto([FromForm] IFormFile photo, string email)
+        {
+            if (photo == null || photo.Length == 0)
+                return BadRequest("Invalid photo.");
+
+            var user = await _unitOfWork.UserManager.FindByEmailAsync(email);
+            if (user == null)
+                return NotFound("User not found.");
+
+            var filePath = Path.Combine("wwwroot", "images", user.Id + Path.GetExtension(photo.FileName));
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await photo.CopyToAsync(stream);
+            }
+
+            user.ImageUrl = filePath;
+            var result = await _unitOfWork.UserManager.UpdateAsync(user);
+            if (result.Succeeded)
+                return Ok("Profile photo updated successfully.");
+            else
+                return BadRequest("Failed to update profile photo.");
+        }
+
+        [HttpPost("ChangeEmail")]
+        public async Task<IActionResult> ChangeEmail(string currentEmail, string newEmail)
+        {
+            var user = await _unitOfWork.UserManager.FindByEmailAsync(currentEmail);
+            if (user == null)
+                return NotFound("User not found.");
+
+            var token = await _unitOfWork.UserManager.GenerateChangeEmailTokenAsync(user, newEmail);
+            var result = await _unitOfWork.UserManager.ChangeEmailAsync(user, newEmail, token);
+            if (result.Succeeded)
+                return Ok("Email updated successfully.");
+            else
+                return BadRequest("Failed to update email.");
+        }*/
+
+
+        #endregion
 
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string token, string email)

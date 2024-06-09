@@ -7,6 +7,6 @@
         public string UserId { get; set; } = null!;
         public string? PlaylistImage {  get; set; } 
         public virtual User? User { get; set; }
-        public virtual ICollection<Track> Tracks { get; set; } = new List<Track>();
+        public virtual ICollection<Track>? Tracks { get; set; }
     }
 }

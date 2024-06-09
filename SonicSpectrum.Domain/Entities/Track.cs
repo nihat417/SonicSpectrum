@@ -13,5 +13,8 @@
         public virtual ICollection<Lyric>? Lyrics { get; set; }
         public virtual ICollection<Album>? Albums { get; set; }
         public virtual ICollection<Genre>? Genres { get; set; }
+        public virtual ICollection<Playlist>? Playlists { get; set; }
     }
 }
+
+

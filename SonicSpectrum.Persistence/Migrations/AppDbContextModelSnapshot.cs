@@ -173,10 +173,28 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PlaylistTrack", b =>
+                {
+                    b.Property<string>("PlaylistsPlaylistId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TracksTrackId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("PlaylistsPlaylistId", "TracksTrackId");
+
+                    b.HasIndex("TracksTrackId");
+
+                    b.ToTable("TrackPlaylists", (string)null);
+                });
+
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.Album", b =>
                 {
                     b.Property<string>("AlbumId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AlbumImage")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ArtistId")
                         .HasColumnType("nvarchar(450)");
@@ -217,6 +235,9 @@ namespace SonicSpectrum.Persistence.Migrations
                 {
                     b.Property<string>("GenreId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("GenreImage")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -286,9 +307,6 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PlaylistId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -298,8 +316,6 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.HasIndex("AlbumId");
 
                     b.HasIndex("ArtistId");
-
-                    b.HasIndex("PlaylistId");
 
                     b.ToTable("Tracks");
                 });
@@ -448,6 +464,21 @@ namespace SonicSpectrum.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PlaylistTrack", b =>
+                {
+                    b.HasOne("SonicSpectrum.Domain.Entities.Playlist", null)
+                        .WithMany()
+                        .HasForeignKey("PlaylistsPlaylistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SonicSpectrum.Domain.Entities.Track", null)
+                        .WithMany()
+                        .HasForeignKey("TracksTrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.Album", b =>
                 {
                     b.HasOne("SonicSpectrum.Domain.Entities.Artist", "Artist")
@@ -491,10 +522,6 @@ namespace SonicSpectrum.Persistence.Migrations
                         .WithMany("Tracks")
                         .HasForeignKey("ArtistId");
 
-                    b.HasOne("SonicSpectrum.Domain.Entities.Playlist", null)
-                        .WithMany("Tracks")
-                        .HasForeignKey("PlaylistId");
-
                     b.Navigation("Album");
 
                     b.Navigation("Artist");
@@ -509,11 +536,6 @@ namespace SonicSpectrum.Persistence.Migrations
                 {
                     b.Navigation("Albums");
 
-                    b.Navigation("Tracks");
-                });
-
-            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Playlist", b =>
-                {
                     b.Navigation("Tracks");
                 });
 

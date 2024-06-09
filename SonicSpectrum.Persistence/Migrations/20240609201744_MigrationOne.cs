@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SonicSpectrum.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class Migration11 : Migration
+    public partial class MigrationOne : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -72,7 +72,8 @@ namespace SonicSpectrum.Persistence.Migrations
                 columns: table => new
                 {
                     GenreId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GenreImage = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -211,6 +212,7 @@ namespace SonicSpectrum.Persistence.Migrations
                 {
                     AlbumId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AlbumImage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ArtistId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     TrackId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
@@ -233,8 +235,7 @@ namespace SonicSpectrum.Persistence.Migrations
                     FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ArtistId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    AlbumId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    PlaylistId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    AlbumId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -249,11 +250,6 @@ namespace SonicSpectrum.Persistence.Migrations
                         column: x => x.ArtistId,
                         principalTable: "Artists",
                         principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Tracks_Playlists_PlaylistId",
-                        column: x => x.PlaylistId,
-                        principalTable: "Playlists",
-                        principalColumn: "PlaylistId");
                 });
 
             migrationBuilder.CreateTable(
@@ -292,6 +288,30 @@ namespace SonicSpectrum.Persistence.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TrackGenres_Tracks_TracksTrackId",
+                        column: x => x.TracksTrackId,
+                        principalTable: "Tracks",
+                        principalColumn: "TrackId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TrackPlaylists",
+                columns: table => new
+                {
+                    PlaylistsPlaylistId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TracksTrackId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrackPlaylists", x => new { x.PlaylistsPlaylistId, x.TracksTrackId });
+                    table.ForeignKey(
+                        name: "FK_TrackPlaylists_Playlists_PlaylistsPlaylistId",
+                        column: x => x.PlaylistsPlaylistId,
+                        principalTable: "Playlists",
+                        principalColumn: "PlaylistId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TrackPlaylists_Tracks_TracksTrackId",
                         column: x => x.TracksTrackId,
                         principalTable: "Tracks",
                         principalColumn: "TrackId",
@@ -363,6 +383,11 @@ namespace SonicSpectrum.Persistence.Migrations
                 column: "TracksTrackId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TrackPlaylists_TracksTrackId",
+                table: "TrackPlaylists",
+                column: "TracksTrackId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tracks_AlbumId",
                 table: "Tracks",
                 column: "AlbumId");
@@ -371,11 +396,6 @@ namespace SonicSpectrum.Persistence.Migrations
                 name: "IX_Tracks_ArtistId",
                 table: "Tracks",
                 column: "ArtistId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Tracks_PlaylistId",
-                table: "Tracks",
-                column: "PlaylistId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Albums_Tracks_TrackId",
@@ -422,10 +442,19 @@ namespace SonicSpectrum.Persistence.Migrations
                 name: "TrackGenres");
 
             migrationBuilder.DropTable(
+                name: "TrackPlaylists");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "Genres");
+
+            migrationBuilder.DropTable(
+                name: "Playlists");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Artists");
@@ -435,12 +464,6 @@ namespace SonicSpectrum.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "Albums");
-
-            migrationBuilder.DropTable(
-                name: "Playlists");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUsers");
         }
     }
 }

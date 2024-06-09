@@ -28,7 +28,7 @@ namespace SonicSpectrum.Presentation.Areas.Admin.Controllers
         }
 
         [HttpPost("addGenre")]
-        public async Task<IActionResult> AddGenre([FromBody] GenreDTO genreDto)
+        public async Task<IActionResult> AddGenre([FromForm] GenreDTO genreDto)
         {
             var result = await _unitOfWork.MusicSettingService.AddGenreAsync(genreDto);
             if (result.Success) return Ok(result.Message);

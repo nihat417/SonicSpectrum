@@ -41,6 +41,12 @@ namespace SonicSpectrum.Persistence.Data
                 .HasMany(track => track.Lyrics)
                 .WithOne(lyric => lyric.Track)
                 .HasForeignKey(lyric => lyric.TrackId);
+
+            modelBuilder.Entity<Track>()
+                .HasMany(track => track.Playlists)
+                .WithMany(playlist => playlist.Tracks)
+                .UsingEntity(j => j.ToTable("TrackPlaylists"));
+
         }
 
 
