@@ -80,7 +80,6 @@ namespace SonicSpectrum.Application.Repository.Concrete
             return tracks;
         }
 
-
         public async Task<IEnumerable<object>> GetRandomTracks()
         {
             var random = new Random();
@@ -101,8 +100,6 @@ namespace SonicSpectrum.Application.Repository.Concrete
             var randomTracks = tracks.OrderBy(x => random.Next()).Take(5).ToList();
             return randomTracks;
         }
-
-
 
         public async Task<IEnumerable<object>> GetAllAlbumsForArtistAsync(string artistId, int pageNumber, int pageSize)
         {
@@ -171,14 +168,12 @@ namespace SonicSpectrum.Application.Repository.Concrete
             }
         }
 
-
-        //bax sehvliy
         public async Task<IEnumerable<object>> GetMusicFromPlaylist(string playlistId, int pageNumber, int pageSize)
         {
             var playlist = await _context.Playlists.FindAsync(playlistId);
             if (playlist == null) return Enumerable.Empty<object>();
 
-            var trackIds = playlist.Tracks.Select(pTrack => pTrack.TrackId).ToList();
+            var trackIds = playlist.Tracks!.Select(pTrack => pTrack.TrackId).ToList();
 
             var tracks = await _context.Tracks
                                         .AsNoTracking()
@@ -254,12 +249,10 @@ namespace SonicSpectrum.Application.Repository.Concrete
                     return result;
                 }
 
-                var album = new Album { 
-                    Title = albumDto.Title,
-                    ArtistId = artist.Id, 
-                    AlbumImage = (albumDto.AlbumImage != null ) ? await UploadFileHelper.UploadFile(albumDto.AlbumImage!, "albumphoto", albumDto.Title) :
-                    "https://seventysoundst.blob.core.windows.net/albumphoto/defalbumphoto.jpg",
-                };
+                var album = new Album { Title = albumDto.Title,ArtistId = artist.Id, };
+
+                album.AlbumImage = (albumDto.AlbumImage != null) ? await UploadFileHelper.UploadFile(albumDto.AlbumImage!, "albumphoto", album.AlbumId) :
+                    "https://seventysoundst.blob.core.windows.net/albumphoto/defalbumphoto.jpg";
 
                 await _context.Albums.AddAsync(album);
                 await _context.SaveChangesAsync();
@@ -297,10 +290,12 @@ namespace SonicSpectrum.Application.Repository.Concrete
             {
                 var artist = new Artist { 
                     Name = artistDto.Name,
-                    ArtistImage = (artistDto.ArtistImage != null) ? 
-                    await UploadFileHelper.UploadFile(artistDto.ArtistImage!, "artistphoto", artistDto.Name) :
-                    "https://seventysoundst.blob.core.windows.net/artistphoto/defartistphoto.jpg",
                 };
+
+                artist.ArtistImage = (artistDto.ArtistImage != null) ?
+                    await UploadFileHelper.UploadFile(artistDto.ArtistImage!, "artistphoto", artist.Id) :
+                    "https://seventysoundst.blob.core.windows.net/artistphoto/defartistphoto.jpg";
+
                 await _context.Artists.AddAsync(artist);
                 await _context.SaveChangesAsync();
 
@@ -339,9 +334,12 @@ namespace SonicSpectrum.Application.Repository.Concrete
                 if (existingGenre == null)
                 {
                     var genre = new Genre {
-                        Name = genreDto.Name,GenreImage = (genreDto.GenreImage != null) ?
-                    await UploadFileHelper.UploadFile(genreDto.GenreImage!, "genrephoto", genreDto.Name) 
-                    : "https://seventysoundst.blob.core.windows.net/albumphoto/defalbumphoto.jpg"};
+                        Name = genreDto.Name,};
+
+                    genre.GenreImage = (genreDto.GenreImage != null)
+                        ? await UploadFileHelper.UploadFile(genreDto.GenreImage!, "genrephoto", genre.GenreId)
+                        : "https://seventysoundst.blob.core.windows.net/albumphoto/defalbumphoto.jpg";
+
                     await _context.Genres.AddAsync(genre);
                     await _context.SaveChangesAsync();
                     result.Success = true;
@@ -402,9 +400,10 @@ namespace SonicSpectrum.Application.Repository.Concrete
                     Title = trackDto.Title,
                     ArtistId = trackDto.ArtistId,
                     AlbumId = trackDto.AlbumId,
-                    FilePath = await UploadFileHelper.UploadFile(trackDto.FilePath, "musicplay", trackDto.Title),
-                    ImagePath = await UploadFileHelper.UploadFile(trackDto.ImagePath, "musicphoto", trackDto.Title)
                 };
+
+                track.FilePath = await UploadFileHelper.UploadFile(trackDto.FilePath, "musicplay", track.TrackId);
+                track.ImagePath = await UploadFileHelper.UploadFile(trackDto.ImagePath, "musicphoto", track.TrackId);
 
                 track.Albums = new HashSet<Album>();
                 track.Genres = new HashSet<Genre>();
@@ -582,10 +581,11 @@ namespace SonicSpectrum.Application.Repository.Concrete
                 {
                     Name = requestDto.PlaylistName,
                     UserId = requestDto.UserId,
-                    PlaylistImage = (requestDto.PlaylistImage != null) ?
-                    await UploadFileHelper.UploadFile(requestDto.PlaylistImage!, "playlistphoto", requestDto.PlaylistName) :
-                    "https://musicstrgac.blob.core.windows.net/playlistphoto/defplaylist.jpg",
                 };
+
+                playlist.PlaylistImage = (requestDto.PlaylistImage != null) ?
+                    await UploadFileHelper.UploadFile(requestDto.PlaylistImage!, "playlistphoto", playlist.PlaylistId) :
+                    "https://musicstrgac.blob.core.windows.net/playlistphoto/defplaylist.jpg";
 
                 _context.Playlists.Add(playlist);
                 await _context.SaveChangesAsync();
@@ -638,14 +638,14 @@ namespace SonicSpectrum.Application.Repository.Concrete
                     return result;
                 }
 
-                if (playlist.Tracks.Any(t => t.TrackId == requestDto.TrackId))
+                if (playlist.Tracks!.Any(t => t.TrackId == requestDto.TrackId))
                 {
                     result.Success = false;
                     result.ErrorMessage = "Track already exists in the playlist.";
                     return result;
                 }
 
-                playlist.Tracks.Add(track);
+                playlist.Tracks!.Add(track);
                 await _context.SaveChangesAsync();
 
                 result.Success = true;
@@ -906,7 +906,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
                     _context.Artists.Remove(artist);
                     await _context.SaveChangesAsync();
 
-                    await UploadFileHelper.DeleteFile(artist.ArtistImage!, "artistphoto");
+                    await UploadFileHelper.DeleteFile(artistId!, "artistphoto");
 
                     result.Success = true;
                     result.Message = "Artist deleted successfully.";
@@ -938,7 +938,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
                     _context.Albums.Remove(album);
                     await _context.SaveChangesAsync();
 
-                    await UploadFileHelper.DeleteFile(album.AlbumImage!, "albumphoto");
+                    await UploadFileHelper.DeleteFile(albumId!, "albumphoto");
 
                     result.Success = true;
                     result.Message = "Album deleted successfully.";
@@ -970,7 +970,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
                     _context.Genres.Remove(genre);
                     await _context.SaveChangesAsync();
 
-                    await UploadFileHelper.DeleteFile(genre.GenreImage!, "genrephoto");
+                    await UploadFileHelper.DeleteFile(genreId!, "genrephoto");
 
                     result.Success = true;
                     result.Message = "Genre deleted successfully.";
@@ -1002,8 +1002,8 @@ namespace SonicSpectrum.Application.Repository.Concrete
                     _context.Tracks.Remove(track);
                     await _context.SaveChangesAsync();
 
-                    await UploadFileHelper.DeleteFile(track.FilePath, "musicplay");
-                    await UploadFileHelper.DeleteFile(track.ImagePath!, "musicphoto");
+                    await UploadFileHelper.DeleteFile(trackId!, "musicplay");
+                    await UploadFileHelper.DeleteFile(trackId!, "musicphoto");
 
                     result.Success = true;
                     result.Message = $"Track '{track.Title}' and associated files deleted successfully";
