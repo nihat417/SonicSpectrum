@@ -19,6 +19,9 @@ namespace SonicSpectrum.Application.Repository.Abstract
         Task<OperationResult> CreatePlaylistAsync(PlaylistDTO requestDto);
         Task<OperationResult> AddTrackToPlaylistAsync(TrackPlaylistDTO requestDto);
 
+        Task UpdateTrackListeningStatisticsAsync(string trackId, int minutesListened);
+        Task UpdateUserListeningStatisticsAsync(string userId, string trackId, int minutesListened);
+
         #endregion
 
         #region edit

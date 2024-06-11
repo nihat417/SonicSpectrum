@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SonicSpectrum.Application;
 using SonicSpectrum.Application.DTOs;
 using SonicSpectrum.Application.Repository.Abstract;
 
@@ -170,6 +171,27 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpPost("updateTrackStatistics")]
+        public async Task<IActionResult> UpdateTrackStatistics([FromBody] UpdateTrackStatisticsDto dto)
+        {
+            if (dto == null || string.IsNullOrEmpty(dto.TrackId) || dto.MinutesListened <= 0)
+                return BadRequest("Invalid request data");
+
+            await _unitOfWork.MusicSettingService.UpdateTrackListeningStatisticsAsync(dto.TrackId, dto.MinutesListened);
+            return Ok("Track statistics updated successfully");
+        }
+
+        [HttpPost("updateUserStatistics")]
+        public async Task<IActionResult> UpdateUserStatistics([FromBody] UpdateUserStatisticsDto dto)
+        {
+            if (dto == null || string.IsNullOrEmpty(dto.UserId) || string.IsNullOrEmpty(dto.TrackId) || dto.MinutesListened <= 0)
+                return BadRequest("Invalid request data");
+
+            await _unitOfWork.MusicSettingService.UpdateUserListeningStatisticsAsync(dto.UserId, dto.TrackId, dto.MinutesListened);
+            return Ok("User statistics updated successfully");
+        }
+
 
         #endregion
     }

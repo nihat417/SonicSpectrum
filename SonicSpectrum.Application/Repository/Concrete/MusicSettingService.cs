@@ -217,7 +217,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
 
         #endregion
 
-        #region Add
+        #region post
 
         public async Task<OperationResult> AddAlbumAsync(AlbumDto albumDto)
         {
@@ -665,7 +665,57 @@ namespace SonicSpectrum.Application.Repository.Concrete
                 return result;
             }
         }
-        
+
+        public async Task UpdateTrackListeningStatisticsAsync(string trackId, int minutesListened)
+        {
+            var trackStatistics = await _context.TrackListeningStatistics.FirstOrDefaultAsync(ts => ts.TrackId == trackId);
+
+            if (trackStatistics == null)
+            {
+                trackStatistics = new TrackListeningStatistics
+                {
+                    TrackId = trackId,
+                    TimesListened = 1,
+                    TotalListeningMinutes = minutesListened
+                };
+
+                await _context.TrackListeningStatistics.AddAsync(trackStatistics);
+            }
+            else
+            {
+                trackStatistics.TimesListened++;
+                trackStatistics.TotalListeningMinutes += minutesListened;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateUserListeningStatisticsAsync(string userId, string trackId, int minutesListened)
+        {
+            var userStatistics = await _context.UserListeningStatistics.FirstOrDefaultAsync(us => us.UserId == userId && us.TrackId == trackId);
+
+            if (userStatistics == null)
+            {
+                userStatistics = new UserListeningStatistics
+                {
+                    UserId = userId,
+                    TrackId = trackId,
+                    TimesListened = 1,
+                    TotalListeningMinutes = minutesListened
+                };
+
+                await _context.UserListeningStatistics.AddAsync(userStatistics);
+            }
+            else
+            {
+                userStatistics.TimesListened++;
+                userStatistics.TotalListeningMinutes += minutesListened;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+
         #endregion
 
         #region Edit

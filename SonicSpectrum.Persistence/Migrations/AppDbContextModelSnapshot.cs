@@ -320,6 +320,28 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.ToTable("Tracks");
                 });
 
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.TrackListeningStatistics", b =>
+                {
+                    b.Property<string>("TrackListeningStatisticsId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("TimesListened")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalListeningMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TrackId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("TrackListeningStatisticsId");
+
+                    b.HasIndex("TrackId");
+
+                    b.ToTable("TrackListeningStatistics");
+                });
+
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.User", b =>
                 {
                     b.Property<string>("Id")
@@ -396,6 +418,34 @@ namespace SonicSpectrum.Persistence.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.UserListeningStatistics", b =>
+                {
+                    b.Property<string>("UserListeningStatisticsId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("TimesListened")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalListeningMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TrackId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserListeningStatisticsId");
+
+                    b.HasIndex("TrackId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserListeningStatistics");
                 });
 
             modelBuilder.Entity("GenreTrack", b =>
@@ -527,6 +577,36 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.Navigation("Artist");
                 });
 
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.TrackListeningStatistics", b =>
+                {
+                    b.HasOne("SonicSpectrum.Domain.Entities.Track", "Track")
+                        .WithMany("ListeningStatistics")
+                        .HasForeignKey("TrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Track");
+                });
+
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.UserListeningStatistics", b =>
+                {
+                    b.HasOne("SonicSpectrum.Domain.Entities.Track", "Track")
+                        .WithMany("UserListeningStatistics")
+                        .HasForeignKey("TrackId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SonicSpectrum.Domain.Entities.User", "User")
+                        .WithMany("ListeningStatistics")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Track");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.Album", b =>
                 {
                     b.Navigation("Tracks");
@@ -543,11 +623,17 @@ namespace SonicSpectrum.Persistence.Migrations
                 {
                     b.Navigation("Albums");
 
+                    b.Navigation("ListeningStatistics");
+
                     b.Navigation("Lyrics");
+
+                    b.Navigation("UserListeningStatistics");
                 });
 
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.User", b =>
                 {
+                    b.Navigation("ListeningStatistics");
+
                     b.Navigation("Playlists");
                 });
 #pragma warning restore 612, 618

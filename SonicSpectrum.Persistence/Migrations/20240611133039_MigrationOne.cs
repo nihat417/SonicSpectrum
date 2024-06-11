@@ -295,6 +295,26 @@ namespace SonicSpectrum.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TrackListeningStatistics",
+                columns: table => new
+                {
+                    TrackListeningStatisticsId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TrackId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TimesListened = table.Column<int>(type: "int", nullable: false),
+                    TotalListeningMinutes = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrackListeningStatistics", x => x.TrackListeningStatisticsId);
+                    table.ForeignKey(
+                        name: "FK_TrackListeningStatistics_Tracks_TrackId",
+                        column: x => x.TrackId,
+                        principalTable: "Tracks",
+                        principalColumn: "TrackId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TrackPlaylists",
                 columns: table => new
                 {
@@ -313,6 +333,33 @@ namespace SonicSpectrum.Persistence.Migrations
                     table.ForeignKey(
                         name: "FK_TrackPlaylists_Tracks_TracksTrackId",
                         column: x => x.TracksTrackId,
+                        principalTable: "Tracks",
+                        principalColumn: "TrackId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserListeningStatistics",
+                columns: table => new
+                {
+                    UserListeningStatisticsId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TrackId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TimesListened = table.Column<int>(type: "int", nullable: false),
+                    TotalListeningMinutes = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserListeningStatistics", x => x.UserListeningStatisticsId);
+                    table.ForeignKey(
+                        name: "FK_UserListeningStatistics_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserListeningStatistics_Tracks_TrackId",
+                        column: x => x.TrackId,
                         principalTable: "Tracks",
                         principalColumn: "TrackId",
                         onDelete: ReferentialAction.Cascade);
@@ -383,6 +430,11 @@ namespace SonicSpectrum.Persistence.Migrations
                 column: "TracksTrackId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TrackListeningStatistics_TrackId",
+                table: "TrackListeningStatistics",
+                column: "TrackId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TrackPlaylists_TracksTrackId",
                 table: "TrackPlaylists",
                 column: "TracksTrackId");
@@ -396,6 +448,16 @@ namespace SonicSpectrum.Persistence.Migrations
                 name: "IX_Tracks_ArtistId",
                 table: "Tracks",
                 column: "ArtistId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserListeningStatistics_TrackId",
+                table: "UserListeningStatistics",
+                column: "TrackId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserListeningStatistics_UserId",
+                table: "UserListeningStatistics",
+                column: "UserId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Albums_Tracks_TrackId",
@@ -442,7 +504,13 @@ namespace SonicSpectrum.Persistence.Migrations
                 name: "TrackGenres");
 
             migrationBuilder.DropTable(
+                name: "TrackListeningStatistics");
+
+            migrationBuilder.DropTable(
                 name: "TrackPlaylists");
+
+            migrationBuilder.DropTable(
+                name: "UserListeningStatistics");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

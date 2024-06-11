@@ -14,6 +14,8 @@
         public virtual ICollection<Album>? Albums { get; set; }
         public virtual ICollection<Genre>? Genres { get; set; }
         public virtual ICollection<Playlist>? Playlists { get; set; }
+        public virtual ICollection<TrackListeningStatistics>? ListeningStatistics { get; set; }
+        public virtual ICollection<UserListeningStatistics>? UserListeningStatistics { get; set; }
     }
 }
 

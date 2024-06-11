@@ -47,6 +47,21 @@ namespace SonicSpectrum.Persistence.Data
                 .WithMany(playlist => playlist.Tracks)
                 .UsingEntity(j => j.ToTable("TrackPlaylists"));
 
+            modelBuilder.Entity<TrackListeningStatistics>()
+                .HasOne(tls => tls.Track)
+                .WithMany(t => t.ListeningStatistics)
+                .HasForeignKey(tls => tls.TrackId);
+
+            modelBuilder.Entity<UserListeningStatistics>()
+                .HasOne(uls => uls.User)
+                .WithMany(u => u.ListeningStatistics)
+                .HasForeignKey(uls => uls.UserId);
+
+            modelBuilder.Entity<UserListeningStatistics>()
+                .HasOne(uls => uls.Track)
+                .WithMany(t => t.UserListeningStatistics)
+                .HasForeignKey(uls => uls.TrackId);
+
         }
 
 
@@ -57,5 +72,7 @@ namespace SonicSpectrum.Persistence.Data
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Lyric> Lyrics { get; set; }
         public DbSet<Playlist> Playlists { get; set; }
+        public DbSet<TrackListeningStatistics> TrackListeningStatistics { get; set; }
+        public DbSet<UserListeningStatistics> UserListeningStatistics { get; set; }
     }
 }

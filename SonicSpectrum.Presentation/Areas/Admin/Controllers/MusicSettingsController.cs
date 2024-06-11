@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SonicSpectrum.Application;
 using SonicSpectrum.Application.DTOs;
 using SonicSpectrum.Application.Repository.Abstract;
+using SonicSpectrum.Application.Repository.Concrete;
 
 namespace SonicSpectrum.Presentation.Areas.Admin.Controllers
 {
@@ -62,7 +64,7 @@ namespace SonicSpectrum.Presentation.Areas.Admin.Controllers
             else return BadRequest(operationResult.ErrorMessage);
         }
 
-
+       
 
 
         #endregion
