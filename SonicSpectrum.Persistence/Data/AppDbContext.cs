@@ -62,6 +62,22 @@ namespace SonicSpectrum.Persistence.Data
                 .WithMany(t => t.UserListeningStatistics)
                 .HasForeignKey(uls => uls.TrackId);
 
+
+            modelBuilder.Entity<Follow>()
+                 .HasKey(f => new { f.FollowerId, f.FolloweeId });
+
+            modelBuilder.Entity<Follow>()
+                .HasOne(f => f.Follower)
+                .WithMany(u => u.Followings)
+                .HasForeignKey(f => f.FollowerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Follow>()
+                .HasOne(f => f.Followee)
+                .WithMany(u => u.Followers)
+                .HasForeignKey(f => f.FolloweeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
 
 
@@ -74,5 +90,6 @@ namespace SonicSpectrum.Persistence.Data
         public DbSet<Playlist> Playlists { get; set; }
         public DbSet<TrackListeningStatistics> TrackListeningStatistics { get; set; }
         public DbSet<UserListeningStatistics> UserListeningStatistics { get; set; }
+        public DbSet<Follow> Follows { get; set; }
     }
 }

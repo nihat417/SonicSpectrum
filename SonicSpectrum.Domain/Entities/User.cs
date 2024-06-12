@@ -10,5 +10,8 @@ namespace SonicSpectrum.Domain.Entities
         public DateTime? CreatedTime { get; set; }
         public virtual ICollection<Playlist>? Playlists { get; set; }
         public virtual ICollection<UserListeningStatistics>? ListeningStatistics { get; set; }
+
+        public virtual ICollection<Follow> Followings { get; set; } = new List<Follow>();
+        public virtual ICollection<Follow> Followers  { get; set; } = new List<Follow>();
     }
 }

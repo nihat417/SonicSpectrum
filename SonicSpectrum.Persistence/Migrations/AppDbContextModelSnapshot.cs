@@ -231,6 +231,34 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.ToTable("Artists");
                 });
 
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Follow", b =>
+                {
+                    b.Property<string>("FollowerId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FolloweeId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("AcceptedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RequestStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("RequestedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("FollowerId", "FolloweeId");
+
+                    b.HasIndex("FolloweeId");
+
+                    b.ToTable("Follows");
+                });
+
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.Genre", b =>
                 {
                     b.Property<string>("GenreId")
@@ -542,6 +570,25 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.Navigation("Artist");
                 });
 
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Follow", b =>
+                {
+                    b.HasOne("SonicSpectrum.Domain.Entities.User", "Followee")
+                        .WithMany("Followers")
+                        .HasForeignKey("FolloweeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SonicSpectrum.Domain.Entities.User", "Follower")
+                        .WithMany("Followings")
+                        .HasForeignKey("FollowerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Followee");
+
+                    b.Navigation("Follower");
+                });
+
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.Lyric", b =>
                 {
                     b.HasOne("SonicSpectrum.Domain.Entities.Track", "Track")
@@ -632,6 +679,10 @@ namespace SonicSpectrum.Persistence.Migrations
 
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.User", b =>
                 {
+                    b.Navigation("Followers");
+
+                    b.Navigation("Followings");
+
                     b.Navigation("ListeningStatistics");
 
                     b.Navigation("Playlists");
