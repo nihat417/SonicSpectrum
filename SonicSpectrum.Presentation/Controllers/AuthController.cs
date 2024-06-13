@@ -91,21 +91,7 @@ namespace SonicSpectrum.Presentation.Controllers
         #region UpdateUser
 
 
-        [HttpPost("ChangeNickname")]
-        public async Task<IActionResult> ChangeNickname(string email, string newNickname)
-        {
-            var user = await _unitOfWork.UserManager.FindByEmailAsync(email);
-            if (user == null)
-                return NotFound("User not found.");
-
-            user.UserName = newNickname;
-            var result = await _unitOfWork.UserManager.UpdateAsync(user);
-            if (result.Succeeded)
-                return Ok("Nickname updated successfully.");
-            else
-                return BadRequest("Failed to update nickname.");
-        }
-
+        
 
         /*[HttpPost("ChangeProfilePhoto")]
         public async Task<IActionResult> ChangeProfilePhoto([FromForm] IFormFile photo, string email)

@@ -43,6 +43,23 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
 
             return BadRequest(result.ErrorMessage);
         }
+
+        [HttpPost("ChangeNickname")]
+        public async Task<IActionResult> ChangeNickname(string email, string newNickname)
+        {
+            var result = await _unitOfWork.AccountService.ChangeNickname(email, newNickname);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
+        }
+
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> DeleteAccount(string userId)
+        {
+            var result = await _unitOfWork.AccountService.DeleteAccount(userId);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
+        }
+
     }
 }
 

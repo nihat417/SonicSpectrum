@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace SonicSpectrum.Application.DTOs
 {
@@ -7,6 +8,7 @@ namespace SonicSpectrum.Application.DTOs
 
         private int _age;
 
+        public IFormFile? ImageUrl { get; set; }
 
         [Required]
         public string UserName { get; set; } = null!;
@@ -36,5 +38,6 @@ namespace SonicSpectrum.Application.DTOs
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; } = null!;
+
     }
 }

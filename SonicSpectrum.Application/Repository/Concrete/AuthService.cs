@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using SonicSpectrum.Application.DTOs;
 using SonicSpectrum.Application.Repository.Abstract;
+using SonicSpectrum.Application.Services;
 using SonicSpectrum.Application.UserSessions;
 using SonicSpectrum.Domain.Entities;
 using static SonicSpectrum.Application.Responses.ServiceResponses;
@@ -41,6 +42,9 @@ namespace SonicSpectrum.Application.Repository.Concrete
                 PasswordHash = userDTO.Password,
                 CreatedTime = DateTime.Now,
             };
+
+            newUser.ImageUrl = (userDTO.ImageUrl != null) ? await UploadFileHelper.UploadFile(userDTO.ImageUrl!, "userphoto", newUser.Id) :
+                   "https://seventysoundst.blob.core.windows.net/userphoto/userdef.png";
 
             var user = await userManager.FindByEmailAsync(userDTO.Email);
             if (user != null) return new GeneralResponse(false, "This email already registered");
