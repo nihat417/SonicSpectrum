@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "apis1": {
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.ApiManagement/service/SonicSpectrumPresentationapis/apis/SonicSpectrumPresentation",
+      "type": "apis.azure"
+    },
+    "mssql1": {
+      "serviceConnectorResourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Web/sites/Seventysoundwebapp/providers/Microsoft.ServiceLinker/linkers/ConnectionStringsazureDef_C15E0E0F25",
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/sonicspectrumdbserver/databases/SonicSpectrum_db",
+      "type": "mssql.azure",
+      "connectionId": "ConnectionStrings:azureDef"
+    }
+  }
+}
