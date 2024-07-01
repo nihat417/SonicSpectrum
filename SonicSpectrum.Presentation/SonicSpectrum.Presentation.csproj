@@ -54,4 +54,8 @@
     <ProjectReference Include="..\SonicSpectrum.Persistence\SonicSpectrum.Persistence.csproj" />
   </ItemGroup>
 
+	<Target Name="OASTarget" AfterTargets="Build" Condition="'$(Configuration)'=='Debug'">
+		<Exec Command="openapi_build.bat $(OutputPath) $(AssemblyName)"/>
+	</Target>
+
 </Project>
