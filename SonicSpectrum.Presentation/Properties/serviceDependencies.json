@@ -1,11 +1,16 @@
 {
   "dependencies": {
-    "apis1": {
-      "type": "apis"
-    },
     "mssql1": {
       "type": "mssql",
       "connectionId": "ConnectionStrings:azureDef"
+    },
+    "apis1": {
+      "ignored": "true",
+      "type": "apis.azure"
+    },
+    "mssql2": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:azureDefault"
     }
   }
 }

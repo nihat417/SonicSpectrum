@@ -1,16 +1,16 @@
-name: Build and deploy .NET Core application to Web App Seventysoundwebapp with API Management Service SonicSpectrumPresentationapis-SonicSpectrumPresentation
+name: Build and deploy .NET Core application to Web App sonicspectrumwebapp with API Management Service SonicSpectrumPresentationapis-SonicSpectrumPresentation
 on:
   push:
     branches:
     - master
 env:
-  AZURE_WEBAPP_NAME: Seventysoundwebapp
+  AZURE_WEBAPP_NAME: sonicspectrumwebapp
   AZURE_WEBAPP_PACKAGE_PATH: SonicSpectrum.Presentation\publish
   AZURE_APIM_RESOURCE_PATH: /
   AZURE_APIM_RESOURCEGROUP: SeventySoundRG
   AZURE_APIM_SERVICENAME: SonicSpectrumPresentationapis
   AZURE_APIM_API_ID: SonicSpectrumPresentation
-  AZURE_APIM_APPSERVICEURL: https://seventysoundwebapp.azurewebsites.net
+  AZURE_APIM_APPSERVICEURL: https://sonicspectrumwebapp.azurewebsites.net
   SWASHBUCLE_ASPNET_CORE_CLI_PACKAGE_VERSION: 5.6.3
   SWASHBUCKLE_DOTNET_CORE_VERSION: 3.1.x
   API_IMPORT_SPECIFICATION_PATH: SonicSpectrum.Presentation\publish\swagger.json
@@ -64,11 +64,11 @@ jobs:
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-        publish-profile: ${{ secrets.Seventysoundwebapp_243A }}
+        publish-profile: ${{ secrets.sonicspectrumwebapp_86D0 }}
     - name: Azure Login
       uses: azure/login@v1
       with:
-        creds: ${{ secrets._SPN }}
+        creds: ${{ secrets.SonicSpectrumPresentationapis_SPN }}
     - name: Import API into Azure API Management
       run: az apim api import --path "${{ env.AZURE_APIM_RESOURCE_PATH }}" --resource-group "${{ env.AZURE_APIM_RESOURCEGROUP }}" --service-name "${{ env.AZURE_APIM_SERVICENAME }}" --api-id "${{ env.AZURE_APIM_API_ID }}" --service-url "${{ env.AZURE_APIM_APPSERVICEURL }}" --specification-path "${{ env.API_IMPORT_SPECIFICATION_PATH }}" --specification-format OpenApi --subscription-required false
     - name: logout
