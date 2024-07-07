@@ -23,7 +23,7 @@ namespace SonicSpectrum.Presentation.Controllers
         public async Task<IActionResult> Register(RegisterDTO registerDTO)
         {
             var response = await _unitOfWork.AuthService.Register(registerDTO);
-            if (response != null)
+            if (response != null && response.Flag == true)
             {
                 var user = await _unitOfWork.UserManager.FindByEmailAsync(registerDTO.Email);
                 if (user != null)
@@ -36,7 +36,7 @@ namespace SonicSpectrum.Presentation.Controllers
                 }
                 return BadRequest();
             }
-            return BadRequest();
+            return BadRequest(response);
         }
 
         [HttpPost("ForgotPassword")]

@@ -49,6 +49,9 @@ namespace SonicSpectrum.Application.Repository.Concrete
             var user = await userManager.FindByEmailAsync(userDTO.Email);
             if (user != null) return new GeneralResponse(false, "This email already registered");
 
+            var userUsername = await userManager.FindByNameAsync(userDTO.UserName);
+            if (userUsername != null) return new GeneralResponse(false, "This Username already registered");
+
             var createUser = await userManager.CreateAsync(newUser!, userDTO.Password);
             if (!createUser.Succeeded) return new GeneralResponse(false, "Error occured.. please try again");
 
