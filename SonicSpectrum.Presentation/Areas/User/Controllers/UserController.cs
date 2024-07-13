@@ -52,6 +52,14 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
             return BadRequest(result.ErrorMessage);
         }
 
+        [HttpPost("ChangeImage")]
+        public async Task<IActionResult> ChangeImage([FromForm]ChangeImageDto imageDto)
+        {
+            var result = await _unitOfWork.AccountService.ChangeImage(imageDto);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
+        }
+
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteAccount(string userId)
         {
@@ -60,6 +68,21 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
             return BadRequest(result.ErrorMessage);
         }
 
+        [HttpPost("OpenProfile")]
+        public async Task<IActionResult> OpenProfile(string userId)
+        {
+            var result = await _unitOfWork.AccountService.OpenProfileAsync(userId);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
+        }
+
+        [HttpPost("PrivateProfile")]
+        public async Task<IActionResult> PrivateProfile(string userId)
+        {
+            var result = await _unitOfWork.AccountService.CloseProfileAsync(userId);
+            if (result.Success) return Ok(result.Message);
+            return BadRequest(result.ErrorMessage);
+        }
     }
 }
 

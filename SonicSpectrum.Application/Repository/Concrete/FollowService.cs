@@ -15,7 +15,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
             if (followerId == followeeId)
             {
                 result.Success = false;
-                result.ErrorMessage = "You cannot follow yourself.";
+                result.ErrorMessage = "You can't follow yourself.";
                 return result;
             }
 
@@ -23,22 +23,30 @@ namespace SonicSpectrum.Application.Repository.Concrete
 
             try
             {
-                var existingFollow = await _context.Follows.
-                                                    AsNoTracking().
-                                                    FirstOrDefaultAsync(f => f.FollowerId == followerId && f.FolloweeId == followeeId);
+                var followee = await _context.Users.FirstOrDefaultAsync(u => u.Id == followeeId);
+                if (followee == null)
+                {
+                    result.Success = false;
+                    result.ErrorMessage = "The user was not found.";
+                    return result;
+                }
+
+                var existingFollow = await _context.Follows
+                                                    .AsNoTracking()
+                                                    .FirstOrDefaultAsync(f => f.FollowerId == followerId && f.FolloweeId == followeeId);
 
                 if (existingFollow != null)
                 {
                     if (existingFollow.RequestStatus == "Pending")
                     {
                         result.Success = false;
-                        result.ErrorMessage = "Follow request is already pending.";
+                        result.ErrorMessage = "The subscription request is already waiting.";
                         return result;
                     }
                     else if (existingFollow.RequestStatus == "Accepted")
                     {
                         result.Success = false;
-                        result.ErrorMessage = "You are already following this user.";
+                        result.ErrorMessage = "You have already subscribed to this user.";
                         return result;
                     }
                 }
@@ -48,7 +56,8 @@ namespace SonicSpectrum.Application.Repository.Concrete
                     FollowerId = followerId,
                     FolloweeId = followeeId,
                     RequestedDate = DateTime.UtcNow,
-                    RequestStatus = "Pending"
+                    RequestStatus = followee.IsProfileOpen ? "Accepted" : "Pending",
+                    AcceptedDate = followee.IsProfileOpen ? DateTime.UtcNow : (DateTime?)null
                 };
 
                 await _context.Follows.AddAsync(follow);
@@ -57,14 +66,17 @@ namespace SonicSpectrum.Application.Repository.Concrete
                 await transaction.CommitAsync();
 
                 result.Success = true;
-                result.Message = "Follow request sent successfully.";
+                result.Message = followee.IsProfileOpen
+                    ? "You are now subscribed to this user."
+                    : "The subscription request has been sent successfully.";
+
                 return result;
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
                 result.Success = false;
-                result.ErrorMessage = $"An error occurred: {ex.Message}";
+                result.ErrorMessage = $"Error: {ex.Message}";
                 return result;
             }
         }
@@ -115,7 +127,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
 
             try
             {
-                var follow = await _context.Follows.FirstOrDefaultAsync(f => f.FollowerId == followerId && f.FolloweeId == followeeId && f.RequestStatus == "Accepted");
+                var follow = await _context.Follows.FirstOrDefaultAsync(f => f.FollowerId == followerId && f.FolloweeId == followeeId && f.RequestStatus == "Accepted" || f.RequestStatus == "Pending");
 
                 if (follow == null)
                 {

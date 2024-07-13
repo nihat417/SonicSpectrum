@@ -38,6 +38,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
                 UserName = userDTO.UserName,
                 FullName = userDTO.FullName,
                 Email = userDTO.Email,
+                IsProfileOpen = true,
                 Age = userDTO.Age,
                 PasswordHash = userDTO.Password,
                 CreatedTime = DateTime.Now,

@@ -1,4 +1,4 @@
-﻿namespace SonicSpectrum.Application
+﻿namespace SonicSpectrum.Application.DTOs
 {
     public class UpdateUserStatisticsDto
     {

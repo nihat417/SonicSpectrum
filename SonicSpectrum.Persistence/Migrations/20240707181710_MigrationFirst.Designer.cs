@@ -12,8 +12,8 @@ using SonicSpectrum.Persistence.Data;
 namespace SonicSpectrum.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240612171649_MigrationOne")]
-    partial class MigrationOne
+    [Migration("20240707181710_MigrationFirst")]
+    partial class MigrationFirst
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -404,6 +404,9 @@ namespace SonicSpectrum.Persistence.Migrations
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsProfileOpen")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");

@@ -29,7 +29,7 @@ namespace SonicSpectrum.Infrastructure.Extensions
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            services.AddSingleton(configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>());
+            services.AddSingleton(configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>()!);
             services.AddSingleton<JwtTokenService>();
 
             return services;
@@ -91,7 +91,7 @@ namespace SonicSpectrum.Infrastructure.Extensions
         {
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("azureDef") ??
+                options.UseSqlServer(configuration.GetConnectionString("default") ??
                     throw new InvalidOperationException("Connection String is not found"));
             });
 

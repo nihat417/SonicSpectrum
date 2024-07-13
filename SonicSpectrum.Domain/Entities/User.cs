@@ -8,6 +8,7 @@ namespace SonicSpectrum.Domain.Entities
         public int Age { get; set; }
         public string? ImageUrl { get; set; }
         public DateTime? CreatedTime { get; set; }
+        public bool IsProfileOpen { get; set; }
         public virtual ICollection<Playlist>? Playlists { get; set; }
         public virtual ICollection<UserListeningStatistics>? ListeningStatistics { get; set; }
 

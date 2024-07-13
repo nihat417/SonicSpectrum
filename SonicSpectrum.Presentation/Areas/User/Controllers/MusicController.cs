@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SonicSpectrum.Application;
 using SonicSpectrum.Application.DTOs;
 using SonicSpectrum.Application.Repository.Abstract;
 
