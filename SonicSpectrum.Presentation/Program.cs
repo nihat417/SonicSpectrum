@@ -1,4 +1,5 @@
-﻿using SonicSpectrum.Infrastructure.Extensions;
+﻿using SonicSpectrum.Application.WebSockets;
+using SonicSpectrum.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,15 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+};
+
+app.UseWebSockets(webSocketOptions);
+
+app.UseMiddleware<WebSocketHandler>();
 
 app.MapControllers();
 

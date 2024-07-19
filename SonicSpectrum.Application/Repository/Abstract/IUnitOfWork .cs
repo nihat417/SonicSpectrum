@@ -8,6 +8,7 @@ namespace SonicSpectrum.Application.Repository.Abstract
         IAuthService AuthService { get; }
         IEmailService EmailService { get; }
         IMusicSettingService MusicSettingService { get; }
+        IMessageService MessageService { get; }
         IAccountService AccountService { get; }
         IFollowService FollowService { get; }
         UserManager<User> UserManager { get; }

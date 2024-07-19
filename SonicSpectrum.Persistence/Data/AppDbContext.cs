@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SonicSpectrum.Domain.Entities;
-using System.Reflection.Emit;
 
 namespace SonicSpectrum.Persistence.Data
 {
@@ -78,6 +77,18 @@ namespace SonicSpectrum.Persistence.Data
                 .HasForeignKey(f => f.FolloweeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Receiver)
+                .WithMany()
+                .HasForeignKey(m => m.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
 
@@ -87,6 +98,7 @@ namespace SonicSpectrum.Persistence.Data
         public DbSet<Track> Tracks { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<Lyric> Lyrics { get; set; }
+        public DbSet<Message> Messages { get; set; }
         public DbSet<Playlist> Playlists { get; set; }
         public DbSet<TrackListeningStatistics> TrackListeningStatistics { get; set; }
         public DbSet<UserListeningStatistics> UserListeningStatistics { get; set; }

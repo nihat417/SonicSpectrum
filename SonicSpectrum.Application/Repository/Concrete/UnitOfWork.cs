@@ -18,6 +18,7 @@ namespace SonicSpectrum.Application.Repository.Concrete
         private IAuthService? _authService;
         private IEmailService? _emailService;
         private IMusicSettingService? _musicSettingService;
+        private IMessageService? _messageService;
         private IAccountService? _accountService;
         private IFollowService? _followService;
 
@@ -38,10 +39,12 @@ namespace SonicSpectrum.Application.Repository.Concrete
         public IAuthService AuthService => _authService ??= new AuthService(_userManager, _roleManager, _jwtTokenService);
         public IEmailService EmailService => _emailService ??= new EmailService(_emailConfiguration);
         public IMusicSettingService MusicSettingService => _musicSettingService ??= new MusicSettingService(_context);
+        public IMessageService MessageService => _messageService ?? (_messageService = new MessageService(_context));
         public IFollowService FollowService => _followService ??= new FollowService(_context);
         public IAccountService AccountService => _accountService ??= new AccountService(_context,_userManager);
         public UserManager<User> UserManager => _userManager;
         public RoleManager<IdentityRole> RoleManager => _roleManager;
+
 
         public async Task<int> SaveChangesAsync()
         {

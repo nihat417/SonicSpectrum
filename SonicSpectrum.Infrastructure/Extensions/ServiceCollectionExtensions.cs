@@ -14,6 +14,7 @@ using SonicSpectrum.Application.Repository.Concrete;
 using IdentityManagerServerApi.Services;
 using SonicSpectrum.Application.Models;
 using Microsoft.AspNetCore.Identity;
+using SonicSpectrum.Application.WebSockets;
 
 
 namespace SonicSpectrum.Infrastructure.Extensions
@@ -31,6 +32,7 @@ namespace SonicSpectrum.Infrastructure.Extensions
 
             services.AddSingleton(configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>()!);
             services.AddSingleton<JwtTokenService>();
+            services.AddScoped<WebSocketHandler>();
 
             return services;
         }

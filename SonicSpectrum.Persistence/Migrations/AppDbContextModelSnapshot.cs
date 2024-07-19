@@ -299,6 +299,39 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.ToTable("Lyrics");
                 });
 
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Message", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ReceiverId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.Playlist", b =>
                 {
                     b.Property<string>("PlaylistId")
@@ -611,6 +644,25 @@ namespace SonicSpectrum.Persistence.Migrations
                         .HasForeignKey("TrackId");
 
                     b.Navigation("Track");
+                });
+
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Message", b =>
+                {
+                    b.HasOne("SonicSpectrum.Domain.Entities.User", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SonicSpectrum.Domain.Entities.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.Playlist", b =>
