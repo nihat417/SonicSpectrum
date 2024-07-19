@@ -271,7 +271,12 @@ namespace SonicSpectrum.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("GenreId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Genres");
                 });
@@ -592,6 +597,13 @@ namespace SonicSpectrum.Persistence.Migrations
                     b.Navigation("Follower");
                 });
 
+            modelBuilder.Entity("SonicSpectrum.Domain.Entities.Genre", b =>
+                {
+                    b.HasOne("SonicSpectrum.Domain.Entities.User", null)
+                        .WithMany("FavoriteGenres")
+                        .HasForeignKey("UserId");
+                });
+
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.Lyric", b =>
                 {
                     b.HasOne("SonicSpectrum.Domain.Entities.Track", "Track")
@@ -682,6 +694,8 @@ namespace SonicSpectrum.Persistence.Migrations
 
             modelBuilder.Entity("SonicSpectrum.Domain.Entities.User", b =>
                 {
+                    b.Navigation("FavoriteGenres");
+
                     b.Navigation("Followers");
 
                     b.Navigation("Followings");

@@ -55,6 +55,11 @@ namespace SonicSpectrum.Application.Repository.Abstract
 
         Task<IEnumerable<object>> GetRandomTracks();
 
+
+        Task<IEnumerable<object>> GetRecommendedTracksAsync(string userId);
+        Task<IEnumerable<object>> GetPopularArtistsAsync();
+        Task<IEnumerable<object>> GetRecommendedAlbumsAsync();
+
         #endregion
 
     }

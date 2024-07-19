@@ -137,6 +137,52 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
             }
         }
 
+
+        [HttpGet("recomendedTracs")]
+        public async Task<IActionResult> GetRecommendedTracks(string userId)
+        {
+            try
+            {
+                var recommendedTracks = await _unitOfWork.MusicSettingService.GetRecommendedTracksAsync(userId);
+                return Ok(recommendedTracks);
+            }
+            catch (Exception ex)
+            {
+                await Console.Out.WriteLineAsync(ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("popularArtist")]
+        public async Task<IActionResult> GetPopularArtists()
+        {
+            try
+            {
+                var popularArtists = await _unitOfWork.MusicSettingService.GetPopularArtistsAsync();
+                return Ok(popularArtists);
+            }
+            catch(Exception ex)
+            {
+                await Console.Out.WriteLineAsync(ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("recommendedAlbums")]
+        public async Task<IActionResult> GetRecommendedAlbums()
+        {
+            try
+            {
+                var recommendedAlbums = await _unitOfWork.MusicSettingService.GetRecommendedAlbumsAsync();
+                return Ok(recommendedAlbums);
+            }
+            catch (Exception ex)
+            {
+                await Console.Out.WriteLineAsync(ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
         #endregion
 
         #region postmethods
@@ -190,7 +236,6 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
             await _unitOfWork.MusicSettingService.UpdateUserListeningStatisticsAsync(dto.UserId, dto.TrackId, dto.MinutesListened);
             return Ok("User statistics updated successfully");
         }
-
 
         #endregion
     }

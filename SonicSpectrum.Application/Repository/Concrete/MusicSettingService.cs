@@ -215,6 +215,128 @@ namespace SonicSpectrum.Application.Repository.Concrete
         }
 
 
+        public async Task<IEnumerable<object>> GetRecommendedTracksAsync(string userId)
+        {
+            var user = await _context.Users
+                .Include(u => u.FavoriteGenres)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+                throw new ArgumentException($"User with ID '{userId}' not found.");
+
+            var random = new Random();
+            /*List<object> recommendedTracks;*/
+
+            if (user.FavoriteGenres == null || !user.FavoriteGenres.Any())
+            {
+                var query = @"
+                    SELECT TOP 10 
+                        t.TrackId, 
+                        t.Title, 
+                        t.FilePath, 
+                        t.ImagePath, 
+                        a.Name AS ArtistName, 
+                        t.ArtistId, 
+                        t.AlbumId, 
+                        al.Title AS AlbumTitle
+                    FROM Tracks t
+                    LEFT JOIN Artists a ON t.ArtistId = a.Id
+                    LEFT JOIN Albums al ON t.AlbumId = al.AlbumId
+                    ORDER BY NEWID()";
+
+                var recommendedTracks = await _context.Tracks
+                    .FromSqlRaw(query)
+                    .Select(t => new
+                    {
+                        t.TrackId,
+                        t.Title,
+                        t.FilePath,
+                        t.ImagePath,
+                        ArtistName = t.Artist!.Name,
+                        t.ArtistId,
+                        t.AlbumId,
+                        AlbumTitle = t.Album!.Title
+                    })
+                    .ToListAsync();
+                return recommendedTracks;
+            }
+            else
+            {
+                var favoriteGenreIds = user.FavoriteGenres.Select(g => g.GenreId).ToList();
+                var genreIdParameters = string.Join(", ", favoriteGenreIds.Select((_, index) => $"@p{index}"));
+
+                var query = $@"
+                    SELECT TOP 10 
+                        t.TrackId, 
+                        t.Title, 
+                        t.FilePath, 
+                        t.ImagePath, 
+                        a.Name AS ArtistName, 
+                        t.ArtistId, 
+                        t.AlbumId, 
+                        al.Title AS AlbumTitle
+                    FROM Tracks t
+                    LEFT JOIN Artists a ON t.ArtistId = a.Id
+                    LEFT JOIN Albums al ON t.AlbumId = al.AlbumId
+                    LEFT JOIN TrackGenres tg ON t.TrackId = tg.TrackId
+                    WHERE tg.GenreId IN ({genreIdParameters})
+                    ORDER BY NEWID()";
+
+                var parameters = favoriteGenreIds.Select((genreId, index) => new SqlParameter($"@p{index}", genreId)).ToArray();
+
+                var recommendedTracks = await _context.Tracks
+                    .FromSqlRaw(query, parameters)
+                    .Select(t => new
+                    {
+                        t.TrackId,
+                        t.Title,
+                        t.FilePath,
+                        t.ImagePath,
+                        ArtistName = t.Artist!.Name,
+                        t.ArtistId,
+                        t.AlbumId,
+                        AlbumTitle = t.Album!.Title
+                    })
+                    .ToListAsync();
+                return recommendedTracks;
+            }
+        }
+
+        public async Task<IEnumerable<object>> GetPopularArtistsAsync()
+        {
+            var popularArtists = await _context.Artists.AsNoTracking()
+                .Select(a => new
+                {
+                    a.Id,
+                    a.Name,
+                    a.ArtistImage,
+                    PopularityScore = a.Tracks!.Sum(t => t.ListeningStatistics!.Sum(ls => ls.TimesListened))
+                })
+                .OrderByDescending(a => a.PopularityScore)
+                .Take(10)
+                .ToListAsync();
+
+            return popularArtists;
+        }
+
+        public async Task<IEnumerable<object>> GetRecommendedAlbumsAsync()
+        {
+            var random = new Random();
+            var albums = await _context.Albums.AsNoTracking()
+                .Select(a => new
+                {
+                    a.AlbumId,
+                    a.Title,
+                    a.AlbumImage,
+                    a.ArtistId,
+                    ArtistName = a.Artist!.Name
+                })
+                .ToListAsync();
+
+            var recommendedAlbums = albums.OrderBy(x => random.Next()).Take(10).ToList();
+            return recommendedAlbums;
+        }
+
         #endregion
 
         #region post

@@ -14,5 +14,7 @@ namespace SonicSpectrum.Domain.Entities
 
         public virtual ICollection<Follow> Followings { get; set; } = new List<Follow>();
         public virtual ICollection<Follow> Followers  { get; set; } = new List<Follow>();
+
+        public virtual ICollection<Genre>? FavoriteGenres { get; set; } = new List<Genre>();
     }
 }
