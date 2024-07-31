@@ -5,8 +5,8 @@ using SonicSpectrum.Application.Repository.Abstract;
 
 namespace SonicSpectrum.Presentation.Areas.User.Controllers
 {
-    
-    /*[Authorize(Roles = "User")]*/
+
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class MusicController (IUnitOfWork _unitOfWork) : ControllerBase
@@ -63,6 +63,7 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
                 return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }
+
 
         [HttpGet("allartists")]
         public async Task<ActionResult<IEnumerable<object>>> GetAllArtists(int pageNumber = 1, int pageSize = 10)

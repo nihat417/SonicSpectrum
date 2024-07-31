@@ -4,11 +4,11 @@ using SonicSpectrum.Infrastructure.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCustomServices(builder.Configuration);
-builder.Services.AddCustomAuthentication(builder.Configuration);
 builder.Services.AddCustomIdentity();
 builder.Services.AddCustomCors();
 builder.Services.AddCustomDbContext(builder.Configuration);
 builder.Services.AddCustomSwagger();
+builder.Services.AddCustomAuthentication(builder.Configuration);
 
 builder.Services.AddEndpointsApiExplorer();
 
