@@ -12,7 +12,7 @@ using SonicSpectrum.Persistence.Data;
 namespace SonicSpectrum.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240719105310_MigrationOne")]
+    [Migration("20240731122422_MigrationOne")]
     partial class MigrationOne
     {
         /// <inheritdoc />

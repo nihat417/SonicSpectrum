@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SonicSpectrum.Application.DTOs;
 using SonicSpectrum.Application.Repository.Abstract;
 
 namespace SonicSpectrum.Presentation.Areas.User.Controllers
 {
+    
+    /*[Authorize(Roles = "User")]*/
     [Route("api/[controller]")]
     [ApiController]
     public class MusicController (IUnitOfWork _unitOfWork) : ControllerBase
