@@ -12,8 +12,8 @@ using SonicSpectrum.Persistence.Data;
 namespace SonicSpectrum.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240731122422_MigrationOne")]
-    partial class MigrationOne
+    [Migration("20240810160418_MiqrationOne")]
+    partial class MiqrationOne
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
