@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy ASP.Net Core app to Azure Web App - SonicSpectrum
+name: Build and deploy ASP.Net Core app to Azure Web App - sonicspectrumwebapp
 
 on:
   push:
@@ -17,9 +17,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up .NET Core
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '8.x'
+          include-prerelease: true
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
@@ -49,17 +50,17 @@ jobs:
           name: .net-app
       
       - name: Login to Azure
-        uses: azure/login@v2
+        uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E902CACFA9A14FFA8D78FADF331B0DBC }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_DED352917EA541479A24BD8284E3B50F }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_647C02B57EE04BE48392884F70FEE31D }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C156064BB69C4467BF6E1BE425DB5BAB }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_56EA1EDAE3114D4C8DE6ECF66FFEDFE4 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3D118642C73B4F068716161B84F19A0F }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'SonicSpectrum'
+          app-name: 'sonicspectrumwebapp'
           slot-name: 'Production'
           package: .
           
