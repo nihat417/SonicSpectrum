@@ -28,9 +28,14 @@ namespace SonicSpectrum.Infrastructure.Extensions
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
             });
 
+            var emailConfig = configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+            if (emailConfig != null)
+            {
+                services.AddSingleton(emailConfig);
+            }
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            services.AddSingleton(configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>()!);
             services.AddSingleton<JwtTokenService>();
             services.AddScoped<WebSocketHandler>();
 
@@ -93,7 +98,7 @@ namespace SonicSpectrum.Infrastructure.Extensions
         {
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("azureDefnew") ??
+                options.UseSqlServer(configuration.GetConnectionString("default") ??
                     throw new InvalidOperationException("Connection String is not found"));
             });
 

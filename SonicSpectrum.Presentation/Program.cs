@@ -1,41 +1,11 @@
-﻿using SonicSpectrum.Application.WebSockets;
-using SonicSpectrum.Infrastructure.Extensions;
+﻿var builder = WebApplication.CreateBuilder(args);
 
-var builder = WebApplication.CreateBuilder(args);
+var startup = new Startup(builder.Configuration);
 
-builder.Services.AddCustomServices(builder.Configuration);
-builder.Services.AddCustomIdentity();
-builder.Services.AddCustomCors();
-builder.Services.AddCustomDbContext(builder.Configuration);
-builder.Services.AddCustomSwagger();
-builder.Services.AddCustomAuthentication(builder.Configuration);
-
-builder.Services.AddEndpointsApiExplorer();
+startup.ConfigureServices(builder.Services);
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseCors("AllowSpecificOrigin");
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-var webSocketOptions = new WebSocketOptions
-{
-    KeepAliveInterval = TimeSpan.FromMinutes(2)
-};
-
-app.UseWebSockets(webSocketOptions);
-
-app.UseMiddleware<WebSocketHandler>();
-
-app.MapControllers();
+startup.Configure(app, app.Environment);
 
 app.Run();
