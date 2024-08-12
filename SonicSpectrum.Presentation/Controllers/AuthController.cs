@@ -24,7 +24,7 @@ namespace SonicSpectrum.Presentation.Controllers
         {
             var response = await _unitOfWork.AuthService.Register(registerDTO);
             if (response != null && response.Flag == true)
-            {
+            { 
                 var user = await _unitOfWork.UserManager.FindByEmailAsync(registerDTO.Email);
                 if (user != null)
                 {
