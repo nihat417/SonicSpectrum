@@ -187,6 +187,24 @@ namespace SonicSpectrum.Presentation.Areas.User.Controllers
             }
         }
 
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchAsync([FromQuery] string query, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return BadRequest("Search query cannot be null or empty.");
+
+            try
+            {
+                var results = await _unitOfWork.MusicSettingService.SearchAsync(query, pageNumber, pageSize);
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error occurred while searching: {ex.Message}");
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
         #endregion
 
         #region postmethods

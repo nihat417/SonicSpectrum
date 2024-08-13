@@ -223,8 +223,8 @@ namespace SonicSpectrum.Application.Repository.Concrete
                                                     u.Email,
                                                     u.IsProfileOpen,
                                                     u.EmailConfirmed,
-                                                    Followers = u.Followers.Select(f => new { f.Id, f.FollowerId }), 
-                                                    Followings = u.Followings.Select(f => new { f.Id, f.FolloweeId }), 
+                                                        Followers = u.Followers.Select(f => new { f.Id,Follower = new{f.Follower.Id,f.Follower.UserName}}), 
+                                                    Followings = u.Followings.Select(f => new { f.Id, Followee = new { f.Followee.Id, f.Followee.UserName} }),
                                                     Playlists = u.Playlists.Select(p => new { p.PlaylistId, p.Name,p.PlaylistImage })
                                                 }).FirstOrDefaultAsync();
 

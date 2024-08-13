@@ -337,6 +337,115 @@ namespace SonicSpectrum.Application.Repository.Concrete
             return recommendedAlbums;
         }
 
+        public async Task<object> SearchAsync(string query, int pageNumber, int pageSize)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                throw new ArgumentNullException(nameof(query), "Search query cannot be null or empty.");
+
+            try
+            {
+                var offset = (pageNumber - 1) * pageSize;
+
+                var tracksQuery = _context.Tracks
+                    .AsNoTracking()
+                    .Where(t => t.Title.Contains(query) || t.Artist!.Name.Contains(query) || t.Album!.Title!.Contains(query))
+                    .Select(t => new
+                    {
+                        Type = "Track",
+                        t.TrackId,
+                        t.Title,
+                        t.FilePath,
+                        t.ImagePath,
+                        ArtistName = t.Artist!.Name,
+                        AlbumTitle = t.Album!.Title
+                    });
+
+                var artistsQuery = _context.Artists
+                    .AsNoTracking()
+                    .Where(a => a.Name.Contains(query))
+                    .Select(a => new
+                    {
+                        Type = "Artist",
+                        a.Id,
+                        a.Name
+                    });
+
+                var albumsQuery = _context.Albums
+                    .AsNoTracking()
+                    .Where(a => a.Title!.Contains(query) || a.Artist!.Name.Contains(query))
+                    .Select(a => new
+                    {
+                        Type = "Album",
+                        a.AlbumId,
+                        a.Title,
+                        a.ArtistId,
+                        ArtistName = a.Artist!.Name
+                    });
+
+                var playlistsQuery = _context.Playlists
+                    .AsNoTracking()
+                    .Where(p => p.Name.Contains(query))
+                    .Select(p => new
+                    {
+                        Type = "Playlist",
+                        p.PlaylistId,
+                        p.Name
+                    });
+
+                var profilesQuery = _context.Users
+                    .AsNoTracking()
+                    .Where(p => p.UserName!.Contains(query) || p.FullName.Contains(query))
+                    .Select(p => new
+                    {
+                        Type = "Profile",
+                        p.Id,
+                        p.UserName,
+                        p.FullName
+                    });
+
+                var tracks = await tracksQuery
+                    .Skip(offset)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var artists = await artistsQuery
+                    .Skip(offset)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var albums = await albumsQuery
+                    .Skip(offset)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var playlists = await playlistsQuery
+                    .Skip(offset)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var profiles = await profilesQuery
+                    .Skip(offset)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var results = new
+                {
+                    Tracks = tracks,
+                    Artists = artists,
+                    Albums = albums,
+                    Playlists = playlists,
+                    Profiles = profiles
+                };
+
+                return results;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error occurred while searching: {ex.Message}");
+                throw;
+            }
+        }
+
         #endregion
 
         #region post
